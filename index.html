@@ -29,8 +29,28 @@ footer input[type=range]{width:100%}
 #ly p.on{color:var(--fg);font-weight:700;font-size:21px}
 .w{color:#b8620a;margin:4px 0}
 .big{width:100%;padding:22px;font-size:20px}
+
+/* personaje */
+#pj{position:fixed;left:0;bottom:var(--fh,90px);z-index:4;pointer-events:none;will-change:transform}
+#pj.off{display:none}
+#pjf{display:block;line-height:0}
+#pjim{display:block;height:var(--ph,160px);width:auto;pointer-events:auto;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transform-origin:50% 100%}
+#pjim.sit{height:calc(var(--ph,160px)*.95)}
+#pjim.lie{height:calc(var(--ph,160px)*.42)}
+.gl{position:absolute;bottom:100%;margin-bottom:8px;left:0;width:max-content;max-width:190px;background:var(--cd);color:var(--fg);border:1px solid var(--bd);border-radius:12px;padding:6px 9px;font-size:13px;line-height:1.3;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.gl::after{content:"";position:absolute;top:100%;left:18px;border:6px solid transparent;border-top-color:var(--cd)}
+@keyframes pjSalta{0%{transform:translateY(0)}35%{transform:translateY(-60px)}70%,100%{transform:translateY(0)}}
+.jump{animation:pjSalta .9s ease-out 2}
+@keyframes pjSaluda{0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+.wave{animation:pjSaluda .6s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes pjTiembla{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.shake{animation:pjTiembla .12s linear infinite}
+@keyframes pjHunde{from{transform:translateY(0)}to{transform:translateY(6px)}}
+.sink{animation:pjHunde 1s ease-out forwards}
+@keyframes pjRespira{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.025)}}
+.breathe{animation:pjRespira 3s ease-in-out infinite;transform-origin:50% 100%}
 </style></head><body>
-<header><b>🎧 Mi Música</b>
+<header><b>🎧 Mi Música</b> <button id="pjt" style="float:right;padding:3px 8px;font-size:12px">🐾 ocultar</button>
 <nav id="tabs"><button data-t="m" class="on">Música</button><button data-t="l">Letra</button><button data-t="p">Pomodoro</button><button data-t="s">Stats</button></nav></header>
 <main>
 <p id="bn" class="w"></p>
@@ -70,6 +90,7 @@ footer input[type=range]{width:100%}
  <div class="row" style="justify-content:space-between"><button id="pv">⏮</button><button id="pp" class="pri">▶</button><button id="nx">⏭</button><button id="rp">🔁 No</button><button id="sh">🔀</button></div>
  <div class="row"><button id="sa">A</button><input class="s" id="ia" placeholder="0:00"><input class="s" id="ib" placeholder="0:00"><button id="sb">B</button><button id="lp">Loop</button><input type="range" id="vo" min="0" max="1" step="0.01" value="1" style="flex:1;min-width:70px"></div>
 </footer>
+<div id="pj" aria-hidden="true"><div class="gl" id="pjb" hidden></div><div id="pjf"><img id="pjim" alt="" src="saluda.png"></div></div>
 <audio id="au"></audio>
 <script>
 const $=s=>document.querySelector(s),A=$('#au');
@@ -172,7 +193,7 @@ function pomUI(){const l=pom.run?(pom.end-Date.now())/1000:pom.left;$('#pt').tex
 ['cf','cs','cl'].forEach((id,i)=>$('#'+id).onchange=e=>{const k='fsl'[i];cfg[k]=Math.max(1,+e.target.value||1);e.target.value=cfg[k];kvset('cfg',cfg);if(!pom.run&&pom.ph===k)pom.left=dur(k);pomUI()});
 $('#cd').oninput=e=>{cfg.d=+e.target.value;$('#cdv').textContent=cfg.d+'%';kvset('cfg',cfg)};
 function beep(){try{ac=ac||new(window.AudioContext||webkitAudioContext)();ac.resume();const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);g.gain.value=.3;o.frequency.value=880;o.start();o.stop(ac.currentTime+.6)}catch(e){}if(navigator.vibrate)navigator.vibrate(300)}
-function nxt(skip){if(pom.ph==='f'){if(!skip){pom.n++;st.pomos[day()]=(st.pomos[day()]||0)+1;dirty=true}pom.ph=pom.n%4?'s':'l';pom.vol=A.volume;fade(A.volume*cfg.d/100)}else{pom.ph='f';fade(pom.vol)}if(!skip)beep()}
+function nxt(skip){if(!skip&&pom.ph==='f')pjEvento('triste');if(pom.ph==='f'){if(!skip){pom.n++;st.pomos[day()]=(st.pomos[day()]||0)+1;dirty=true}pom.ph=pom.n%4?'s':'l';pom.vol=A.volume;fade(A.volume*cfg.d/100)}else{pom.ph='f';fade(pom.vol)}if(!skip)beep()}
 function pomTick(){while(pom.run&&Date.now()>=pom.end){nxt();pom.end+=dur(pom.ph)*1000}pomUI()}
 $('#ps').onclick=()=>{try{ac=ac||new(window.AudioContext||webkitAudioContext)();ac.resume()}catch(e){}if(pom.run){pom.left=(pom.end-Date.now())/1000;pom.run=false}else{pom.end=Date.now()+pom.left*1000;pom.run=true}pomUI()};
 $('#pk').onclick=()=>{nxt(true);pom.left=dur(pom.ph);if(pom.run)pom.end=Date.now()+pom.left*1000;pomUI()};
@@ -189,4 +210,60 @@ setInterval(()=>{const n=performance.now(),d=(n-last)/1000;last=n;
  $('#tm').textContent=ft(A.currentTime)+' / '+ft(A.duration||0);hl();pomTick()},100);
 function save(){if(!dirty)return;dirty=false;if(cur)put(cur);kvset('st',st)}
 setInterval(save,10000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+/* ===== PERSONAJE: edita aquí las frases y los tiempos ===== */
+const PJ_CFG={vel:45,sentarTras:25,dormirTras:45,pausaMin:2.5,pausaMax:4.5,caminaMin:3,caminaMax:6,globoMs:2800,saludoMs:2500};
+const PJ_FRASES={
+ saluda:['¡Hola! ¿Qué escuchamos hoy?','¡Qué bueno verte por aquí!','¡Hola! Vamos con música.'],
+ salta:['¡Nueva canción!','¡Esta me encanta!','¡Vamos con esta!'],
+ sorpresa:['¡Ay! ¿Qué pasa?','¡Me asustaste!','¡Oye, cuidado!'],
+ triste:['Se acabó el enfoque… buen trabajo.','Toca descansar un ratito.','Un pomodoro menos. ¡Bien hecho!'],
+ sienta:['Uf, descansemos un poquito…','Me siento a esperar.','¿Sigues ahí?'],
+ duerme:['zzz… shhh, estoy dormida.','zzz… no me despiertes.','zzz…'],
+ camina:['¡Vamos a dar una vuelta!','Un paseíto corto…','Qué bonita música.'],
+ pensa:['Hmm… ¿qué sigue?','Déjame pensar…','¿Qué escuchamos después?'],
+ base:['Aquí estoy.','Lista para lo que sea.']
+};
+/* imágenes: deben estar en la misma carpeta que index.html */
+const PJ_POSE={camina:'camina1.png',pensa:'pensando.png',base:'base.png',saluda:'saluda.png',salta:'salta.png',sorpresa:'sorprendida.png',triste:'triste.png',sienta:'sentada.png',duerme:'duerme.png'};
+const PJ_TAM={sienta:'sit',duerme:'lie'};
+const PJ={el:$('#pj'),fl:$('#pjf'),im:$('#pjim'),bub:$('#pjb'),bt:null,x:4,dir:1,mode:'',until:0,touch:Date.now(),t:0,hidden:false};
+const pjGet=()=>{try{return localStorage.getItem('pjoculto')==='1'}catch(e){return false}};
+const pjPut=v=>{try{localStorage.setItem('pjoculto',v?'1':'0')}catch(e){}};
+function pjSize(){const r=document.documentElement.style;r.setProperty('--ph',Math.round(Math.min(200,Math.max(120,innerHeight*.2)))+'px');r.setProperty('--fh',$('footer').offsetHeight+'px')}
+function pjAnim(c){PJ.im.className='';void PJ.im.offsetWidth;PJ.im.className=c||''}
+function pjPlace(){const bw=PJ.bub.offsetWidth,w=PJ.fl.offsetWidth,cx=PJ.x+w/2;const bl=Math.max(6,Math.min(innerWidth-bw-6,cx-bw/2));PJ.bub.style.left=(bl-PJ.x)+'px'}
+function pjSay(k){const L=PJ_FRASES[k];if(!L||PJ.hidden)return;PJ.bub.textContent=L[Math.random()*L.length|0];PJ.bub.hidden=false;clearTimeout(PJ.bt);PJ.bt=setTimeout(()=>PJ.bub.hidden=true,PJ_CFG.globoMs);pjPlace()}
+function pjSet(mode,k,anim,ms){PJ.mode=mode;PJ.im.src=PJ_POSE[k];pjAnim([PJ_TAM[k],anim].filter(Boolean).join(' '));PJ.until=ms===Infinity?Infinity:Date.now()+ms;pjSay(k)}
+function pjPausa(){const c=Math.random()<.15;pjSet('pausa',c?'base':'pensa','',(PJ_CFG.pausaMin+Math.random()*(PJ_CFG.pausaMax-PJ_CFG.pausaMin))*1000)}
+function pjCamina(){if(Math.random()<.3)PJ.dir*=-1;pjSet('walk','camina','',(PJ_CFG.caminaMin+Math.random()*(PJ_CFG.caminaMax-PJ_CFG.caminaMin))*1000)}
+function pjEvento(k){if(PJ.hidden)return;const ms={triste:4000,salta:1800,sorpresa:1600,saluda:PJ_CFG.saludoMs}[k]||2000;const anim={triste:'sink',salta:'jump',sorpresa:'shake',saluda:'wave'}[k]||'';pjSet(k,k,anim,ms)}
+function pjTick(){if(PJ.hidden)return;const idle=(Date.now()-PJ.touch)/1000,now=Date.now();
+ if(PJ.mode==='sienta'){if(idle>PJ_CFG.dormirTras)pjSet('duerme','duerme','breathe',Infinity);return}
+ if(PJ.mode==='duerme')return;
+ if(idle>PJ_CFG.sentarTras){pjSet('sienta','sienta','breathe',Infinity);return}
+ if(now>=PJ.until){if(PJ.mode==='pausa')pjCamina();else pjPausa()}}
+function pjLoop(now){const dt=PJ.t?Math.min(.05,(now-PJ.t)/1000):0;PJ.t=now;
+ if(!PJ.hidden){
+  if(PJ.mode==='walk'){
+   PJ.x+=PJ.dir*PJ_CFG.vel*dt;
+   const max=innerWidth-PJ.fl.offsetWidth-4;
+   if(PJ.x>max){PJ.x=max;PJ.dir=-1}
+   if(PJ.x<4){PJ.x=4;PJ.dir=1}
+   const s=Math.sin(now/160);
+   PJ.im.style.transform=`translateY(${-Math.abs(s)*6}px) rotate(${s*1.5}deg)`;
+  }else if(PJ.im.style.transform)PJ.im.style.transform='';
+  PJ.fl.style.transform=`scaleX(${PJ.dir>0?1:-1})`;
+  PJ.el.style.transform=`translate3d(${PJ.x}px,0,0)`;
+  if(!PJ.bub.hidden)pjPlace();
+ }
+ requestAnimationFrame(pjLoop)}
+/* cualquier toque o tecla cuenta como actividad; si estaba sentada o dormida, se despierta */
+['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{const estaba=PJ.mode;PJ.touch=Date.now();if(estaba==='sienta'||estaba==='duerme')pjEvento('sorpresa')},{passive:true}));
+A.addEventListener('loadedmetadata',()=>{if(!PJ.hidden)pjEvento('salta')});
+PJ.im.onpointerdown=e=>{e.stopPropagation();pjEvento('sorpresa')};
+$('#pjt').onclick=()=>{PJ.hidden=!PJ.hidden;pjPut(PJ.hidden);PJ.el.classList.toggle('off',PJ.hidden);$('#pjt').textContent=PJ.hidden?'🐾 mostrar':'🐾 ocultar';if(PJ.hidden)PJ.bub.hidden=true;else{PJ.touch=Date.now();pjEvento('saluda')}};
+PJ.hidden=pjGet();PJ.el.classList.toggle('off',PJ.hidden);$('#pjt').textContent=PJ.hidden?'🐾 mostrar':'🐾 ocultar';
+pjSize();new ResizeObserver(pjSize).observe($('footer'));addEventListener('resize',pjSize);
+setInterval(pjTick,300);requestAnimationFrame(pjLoop);
+if(!PJ.hidden)pjEvento('saluda');
 </script></body></html>
