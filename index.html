@@ -1,35 +1,95 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
+<meta name="theme-color" content="#121212">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mi Música</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎧%3C/text%3E%3C/svg%3E">
 <style>
-:root{--bg:#f2f2f8;--fg:#17162a;--mu:#6c6b82;--cd:#fff;--bd:#dddcec;--ac:#4b3fe0}
-@media(prefers-color-scheme:dark){:root{--bg:#14131f;--fg:#ecebf7;--mu:#9a99b3;--cd:#1e1d2e;--bd:#2f2e45;--ac:#8b7cff}}
-*{box-sizing:border-box}[hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,sans-serif;padding-top:env(safe-area-inset-top)}
-header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--bd);padding:8px 10px;z-index:5}
-nav{display:flex;gap:6px;margin-top:6px}
-button,select,input,textarea{font:inherit;color:inherit}
-button{background:var(--cd);border:1px solid var(--bd);border-radius:8px;padding:7px 10px}
-button.on,button.pri{background:var(--ac);border-color:var(--ac);color:#fff}
-nav button{flex:1;padding:6px 2px;font-size:13px}
-main{padding:10px 10px 240px}
-section{display:none}section.on{display:block}
-.row{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap}
-.it{display:flex;align-items:center;gap:8px;padding:9px;background:var(--cd);border:1px solid var(--bd);border-radius:10px;margin:5px 0}
-.it .t{flex:1;min-width:0}.it b,.it small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.it small,.mu{color:var(--mu)}.it.now{border-color:var(--ac)}
-input:not([type]),input[type=text],input[type=number],textarea,select{background:var(--cd);border:1px solid var(--bd);border-radius:8px;padding:7px;width:100%}
-.s{width:62px!important;text-align:center}
-textarea{min-height:190px;font:13px ui-monospace,monospace}
-footer{position:fixed;left:0;right:0;bottom:0;background:var(--cd);border-top:1px solid var(--bd);padding:8px 10px calc(8px + env(safe-area-inset-bottom));z-index:6}
-footer input[type=range]{width:100%}
-#ly p{margin:0;padding:7px 4px;font-size:18px;color:var(--mu)}
-#ly p.on{color:var(--fg);font-weight:700;font-size:21px}
-.w{color:#b8620a;margin:4px 0}
-.big{width:100%;padding:22px;font-size:20px}
 
+:root{--bg:#121212;--side:#000;--card:#181818;--card2:#242424;--bd:#2f2f2f;--fg:#ffffff;--mu:#b3b3b3;--ac:#1ed760;--cd:#282828}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,"Segoe UI",sans-serif;overflow:hidden}
+.app{height:100vh;display:grid;grid-template-columns:240px minmax(0,1fr);padding-top:env(safe-area-inset-top)}
+aside{background:var(--side);padding:22px 12px;overflow:auto;min-height:0}
+.logo{font-size:22px;font-weight:800;padding:4px 12px 22px;letter-spacing:-.5px}
+.logo span{color:var(--ac)}
+#tabs{display:flex;flex-direction:column;gap:4px}
+#tabs button{background:transparent;color:var(--mu);font-weight:700;text-align:left;border-radius:8px;padding:10px 12px;font-size:15px}
+#tabs button:hover{color:#fff}
+#tabs button.on{background:var(--card2);color:#fff}
+main{overflow:auto;min-height:0;background:linear-gradient(180deg,#2d2b57 0,#1a1a1a 340px,var(--bg) 460px);padding-bottom:calc(var(--fh,96px) + 28px)}
+main section{display:none;padding:0 28px}
+main section.on{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 28px 0;min-height:52px}
+.hero{padding:30px 0 16px}
+.hero h1{margin:4px 0 0;font-size:40px;letter-spacing:-1px;font-weight:800}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0 14px}
+.bar.center{justify-content:center}
+button{font:inherit;color:var(--fg);background:var(--card2);border:0;border-radius:500px;padding:8px 16px;cursor:pointer;transition:background .15s,transform .05s}
+button:hover{background:#333}
+button:active{transform:scale(.97)}
+button.pri{background:var(--ac);color:#000;font-weight:700}
+button.pri:hover{background:#1fdf64}
+button.on{color:var(--ac)}
+button.ghost{background:transparent;border:1px solid #444}
+button.big{width:100%;padding:22px;font-size:20px}
+button.big2{padding:12px 36px;font-size:16px}
+input:not([type]),input[type=text],input[type=number],textarea,select{background:var(--card2);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;font:inherit}
+select{border-radius:500px;padding:8px 14px;min-width:200px;cursor:pointer}
+textarea{width:100%;min-height:190px;font:13px ui-monospace,monospace}
+.s{width:64px!important;text-align:center}
+input[type=range]{accent-color:var(--ac)}
+.mu{color:var(--mu)}
+.w{color:#f0a04b;margin:6px 0}
+#list{padding:4px 0}
+.it{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:6px;margin:0;cursor:pointer}
+.it:hover{background:#2a2a2a}
+.it.now b{color:var(--ac)}
+.it .t{flex:1;min-width:0}
+.it b,.it small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it small{color:var(--mu)}
+.it button{background:transparent;padding:4px 8px;color:var(--mu)}
+.it button:hover{color:#fff}
+.lyr p{margin:0;padding:8px 0;font-size:18px;color:var(--mu)}
+.lyr p.on{color:#fff;font-weight:800;font-size:22px}
+#lm{padding:0 0 8px}
+#chk p{margin:4px 0}
+.clock{text-align:center;padding:30px 0 8px}
+#pt{font-size:96px;font-weight:800;letter-spacing:-3px;line-height:1}
+.cfg{display:flex;flex-wrap:wrap;gap:18px;color:var(--mu);justify-content:center;padding:18px 0}
+.cfg label{display:flex;align-items:center;gap:8px}
+#sx{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding-bottom:20px}
+#sx>h3{grid-column:1/-1;margin:20px 0 4px;font-size:20px}
+#sx .it{background:var(--card);margin:0}
+#sx>.it:first-child{grid-column:auto}
+footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px solid #2a2a2a;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr);gap:16px;align-items:center;padding:10px 18px calc(10px + env(safe-area-inset-bottom));z-index:6}
+.fl{min-width:0;display:flex;flex-direction:column;gap:2px}
+.fl #pt2{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fc{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ctl{display:flex;justify-content:center;gap:10px;align-items:center}
+.ctl button{background:transparent;padding:6px 10px}
+.ctl button:hover{color:var(--ac)}
+#pp{width:44px;height:44px;border-radius:50%;padding:0;font-size:18px;display:flex;align-items:center;justify-content:center}
+#sk{width:100%}
+.ab{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}
+.ab button{padding:5px 10px;font-size:13px}
+.fr{display:flex;align-items:center;gap:8px}
+#vo{width:100%}
+#tm{white-space:nowrap}
+@media(max-width:760px){
+ .app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+ aside{padding:8px 10px}
+ .logo{display:none}
+ #tabs{flex-direction:row;overflow-x:auto}
+ #tabs button{white-space:nowrap;text-align:center}
+ main section{padding:0 14px}
+ .top{padding:12px 14px 0}
+ .hero h1{font-size:28px}
+ #pt{font-size:64px}
+ footer{grid-template-columns:1fr;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+ .fr{display:none}
+}
 /* personaje */
 #pj{position:fixed;left:0;bottom:var(--fh,90px);z-index:4;pointer-events:none;will-change:transform}
 #pj.off{display:none}
@@ -50,48 +110,60 @@ footer input[type=range]{width:100%}
 @keyframes pjRespira{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.025)}}
 .breathe{animation:pjRespira 3s ease-in-out infinite;transform-origin:50% 100%}
 </style></head><body>
-<header><b>🎧 Mi Música</b> <button id="pjt" style="float:right;padding:3px 8px;font-size:12px">🐾 ocultar</button>
-<nav id="tabs"><button data-t="m" class="on">Música</button><button data-t="l">Letra</button><button data-t="p">Pomodoro</button><button data-t="s">Stats</button></nav></header>
+<div class="app">
+<aside>
+ <div class="logo">🎧 Mi<span>Música</span></div>
+ <nav id="tabs"><button data-t="m" class="on">🏠 Biblioteca</button><button data-t="l">🎤 Letra</button><button data-t="p">⏱ Pomodoro</button><button data-t="s">📊 Estadísticas</button></nav>
+</aside>
 <main>
-<p id="bn" class="w"></p>
-<section id="m" class="on">
- <div class="row"><select id="sel" style="flex:1;width:auto"></select><button id="nl">＋ Lista</button></div>
- <div class="row"><button class="pri" id="add">＋ Agregar canciones</button><input type="file" id="file" accept="audio/*" multiple hidden><button id="el" hidden>Editar lista</button><button id="dl" hidden>Borrar lista</button></div>
- <div id="list"></div>
-</section>
-<section id="l">
- <div class="row"><b id="lt">Sin canción</b></div>
- <div class="mu" id="lm"></div>
- <div class="row"><button id="lf">Buscar / otra coincidencia</button><button id="le">Editar</button><button id="o1">−0,5 s</button><button id="o2">+0,5 s</button></div>
- <div id="ly"></div>
- <div id="edp" hidden>
-  <textarea id="ed" placeholder="Pega la letra (una línea por verso) o edita el texto con tiempos [mm:ss.xx]"></textarea>
-  <div class="row"><button class="pri" id="sv">Guardar / sincronizar</button><button id="ck">Revisar</button></div>
-  <div id="chk"></div>
- </div>
- <div id="tapp" hidden>
-  <p class="mu">Pon la canción desde el inicio y toca el botón cada vez que empiece una línea (se compensan 0,3 s de reacción).</p>
-  <p id="tp"></p>
-  <button class="big pri" id="tb">Toque</button>
-  <div class="row"><button id="tu">Atrás</button><button id="tc">Cancelar</button></div>
- </div>
-</section>
-<section id="p">
- <div style="text-align:center"><div id="pph" class="mu">Enfoque</div><div id="pt" style="font-size:68px;font-weight:700">25:00</div><div id="pn" class="mu"></div></div>
- <div class="row"><button class="pri" id="ps" style="flex:1">Iniciar</button><button id="pk">Saltar</button><button id="pr">Reiniciar</button></div>
- <div class="row mu">Enfoque (min) <input type="number" class="s" id="cf"> Descanso <input type="number" class="s" id="cs"> Largo <input type="number" class="s" id="cl"></div>
- <div class="row mu">Volumen en descanso <input type="range" id="cd" min="0" max="100" style="flex:1"><span id="cdv"></span></div>
-</section>
-<section id="s"><div id="sx"></div></section>
+ <div class="top"><p id="bn" class="w"></p><button id="pjt" class="ghost">🐾 ocultar</button></div>
+ <section id="m" class="on">
+  <div class="hero"><small class="mu">Tu biblioteca</small><h1>Mis canciones</h1></div>
+  <div class="bar"><select id="sel"></select><button id="nl">＋ Lista</button><button class="pri" id="add">＋ Agregar canciones</button><input type="file" id="file" accept="audio/*" multiple hidden><button id="el" hidden>Editar lista</button><button id="dl" hidden>Borrar lista</button></div>
+  <div id="list"></div>
+ </section>
+ <section id="l">
+  <div class="hero"><small class="mu">Letra sincronizada</small><h1 id="lt">Sin canción</h1></div>
+  <div class="mu" id="lm"></div>
+  <div class="bar"><button id="lf">Buscar / otra coincidencia</button><button id="le">Editar</button><button id="o1">−0,5 s</button><button id="o2">+0,5 s</button></div>
+  <div id="ly" class="lyr"></div>
+  <div id="edp" hidden>
+   <textarea id="ed" placeholder="Pega la letra (una línea por verso) o edita el texto con tiempos [mm:ss.xx]"></textarea>
+   <div class="bar"><button class="pri" id="sv">Guardar / sincronizar</button><button id="ck">Revisar</button></div>
+   <div id="chk"></div>
+  </div>
+  <div id="tapp" hidden>
+   <p class="mu">Pon la canción desde el inicio y toca el botón cada vez que empiece una línea (se compensan 0,3 s de reacción).</p>
+   <p id="tp"></p>
+   <button class="big pri" id="tb">Toque</button>
+   <div class="bar"><button id="tu">Atrás</button><button id="tc">Cancelar</button></div>
+  </div>
+ </section>
+ <section id="p">
+  <div class="hero"><small class="mu">Modo enfoque</small><h1 id="pph">Enfoque</h1></div>
+  <div class="clock"><div id="pt">25:00</div><div id="pn" class="mu"></div></div>
+  <div class="bar center"><button class="pri big2" id="ps">Iniciar</button><button id="pk">Saltar</button><button id="pr">Reiniciar</button></div>
+  <div class="cfg">
+   <label>Enfoque (min) <input type="number" class="s" id="cf"></label>
+   <label>Descanso <input type="number" class="s" id="cs"></label>
+   <label>Largo <input type="number" class="s" id="cl"></label>
+   <label>Volumen en descanso <input type="range" id="cd" min="0" max="100" style="width:140px"><span id="cdv"></span></label>
+  </div>
+ </section>
+ <section id="s"><div class="hero"><small class="mu">Tu actividad</small><h1>Estadísticas</h1></div><div id="sx"></div></section>
 </main>
+</div>
 <footer>
- <div class="row" style="margin:0"><b id="pt2" style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">—</b><span class="mu" id="tm">0:00 / 0:00</span></div>
- <input type="range" id="sk" min="0" max="1000" value="0">
- <div class="row" style="justify-content:space-between"><button id="pv">⏮</button><button id="pp" class="pri">▶</button><button id="nx">⏭</button><button id="rp">🔁 No</button><button id="sh">🔀</button></div>
- <div class="row"><button id="sa">A</button><input class="s" id="ia" placeholder="0:00"><input class="s" id="ib" placeholder="0:00"><button id="sb">B</button><button id="lp">Loop</button><input type="range" id="vo" min="0" max="1" step="0.01" value="1" style="flex:1;min-width:70px"></div>
+ <div class="fl"><b id="pt2">—</b><span class="mu" id="tm">0:00 / 0:00</span></div>
+ <div class="fc">
+  <div class="ctl"><button id="sh">🔀</button><button id="pv">⏮</button><button id="pp" class="pri">▶</button><button id="nx">⏭</button><button id="rp">🔁 No</button></div>
+  <input type="range" id="sk" min="0" max="1000" value="0">
+  <div class="ab"><button id="sa">A</button><input class="s" id="ia" placeholder="0:00"><input class="s" id="ib" placeholder="0:00"><button id="sb">B</button><button id="lp">Loop</button></div>
+ </div>
+ <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"></div>
 </footer>
-<div id="pj" aria-hidden="true"><div class="gl" id="pjb" hidden></div><div id="pjf"><img id="pjim" alt="" src="saluda.png"></div></div>
 <audio id="au"></audio>
+<div id="pj" aria-hidden="true"><div class="gl" id="pjb" hidden></div><div id="pjf"><img id="pjim" alt="" src="saluda.png"></div></div>
 <script>
 const $=s=>document.querySelector(s),A=$('#au');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
