@@ -570,4 +570,9 @@ MAIN.addEventListener('scroll',()=>{const y=MAIN.scrollTop;
  if(y>ultY+12&&y>60&&!FT.classList.contains('min'))fmin(true);
  else if(y<ultY-12&&y<60&&FT.classList.contains('min'))fmin(false);
  ultY=y},{passive:true});
+/* ===== ERROR AL LEER UN ARCHIVO ===== */
+A.addEventListener('error',()=>{
+ if(restaurando){restaurando=false;ult=null;try{kvset('ult',null)}catch(e){}}
+ if(cur)note('Brave no puede leer "'+cur.title+'". Si es .mkv o .mov, conviértelo a .mp4 o .mp3 y vuelve a agregarlo.');
+});
 </script></body></html>
