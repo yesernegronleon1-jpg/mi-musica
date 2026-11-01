@@ -170,6 +170,26 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
 .vcap{display:none;padding:8px 12px;font-size:14px;font-weight:700;color:#fff;background:#1d1d1d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #vwrap.fijo .vcap{display:block}
 @media(max-width:760px){#npan{padding:0 14px}}
+main{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+@media(max-width:760px){
+ footer{padding:6px 10px calc(6px + env(safe-area-inset-bottom));gap:4px}
+ .fl #tm{display:none}
+ .fl #pt2{font-size:13px}
+ .ctl{gap:4px}
+ .ctl button{padding:4px 6px;font-size:13px}
+ #pp{width:38px;height:38px}
+ .ab{gap:4px}
+ .ab button{padding:4px 8px;font-size:12px}
+ .ab .s{width:52px!important;padding:4px 6px;font-size:12px}
+ main{padding-bottom:calc(var(--fh,96px) + 40px)}
+}
+button#pp{background:var(--ac);color:#000}
+button#pp:hover{background:#1fdf64;color:#000}
+#fmin{position:absolute;top:-18px;right:12px;padding:1px 14px;font-size:14px;line-height:1.2;background:#181818;border:1px solid #2a2a2a;border-bottom:0;border-radius:12px 12px 0 0;color:var(--mu)}
+footer.min{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);padding-top:6px;padding-bottom:6px}
+footer.min #tm,footer.min #sk,footer.min .ab,footer.min .fr{display:none}
+footer.min .fl{flex-direction:row;align-items:center}
+footer.min .ctl button:not(#pp){display:none}
 </style></head><body>
 <div class="app">
 <aside>
@@ -220,6 +240,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
 </main>
 </div>
 <footer>
+ <button id="fmin" title="Mostrar u ocultar el reproductor">▾</button>
  <div class="fl"><b id="pt2">—</b><span class="mu" id="tm">0:00 / 0:00</span></div>
  <div class="fc">
   <div class="ctl"><button id="sh">🔀</button><button id="pv">⏮</button><button id="pp" class="pri">▶</button><button id="nx">⏭</button><button id="rp">🔁 No</button></div>
@@ -540,4 +561,13 @@ $('#vfs').onclick=()=>{const f=A.requestFullscreen||A.webkitRequestFullscreen;tr
 $('#vtog').onclick=()=>{W.classList.toggle('off');$('#vtog').textContent=W.classList.contains('off')?'🎬 mostrar video':'🎬 ocultar video'};
 /* ===== PRUEBA: contador de canciones guardadas ===== */
 setInterval(()=>{$('#cuenta').textContent=songs.length+(songs.length===1?' canción guardada':' canciones guardadas')+' · v1.1'},1000);
+/* ===== REPRODUCTOR MINIMIZADO ===== */
+const FT=$('footer'),MAIN=document.querySelector('main');
+function fmin(v){FT.classList.toggle('min',v);$('#fmin').textContent=v?'▴':'▾';pjSize()}
+$('#fmin').onclick=()=>fmin(!FT.classList.contains('min'));
+let ultY=0;
+MAIN.addEventListener('scroll',()=>{const y=MAIN.scrollTop;
+ if(y>ultY+12&&y>60&&!FT.classList.contains('min'))fmin(true);
+ else if(y<ultY-12&&y<60&&FT.classList.contains('min'))fmin(false);
+ ultY=y},{passive:true});
 </script></body></html>
