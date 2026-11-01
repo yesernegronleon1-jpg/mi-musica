@@ -201,6 +201,16 @@ footer.min .ctl button:not(#pp){display:none}
 .resp{display:flex;flex-direction:column;gap:6px;padding:18px 12px 0}
 .resp button{width:100%;text-align:left;padding:8px 14px;background:transparent;border:1px solid #444;color:var(--fg)}
 #almac{font-size:12px;padding:4px 2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+main section.on{animation:fadeUp .3s ease}
+.hcard{animation:fadeUp .35s ease}
+.hbanner{animation:fadeUp .3s ease}
+button:hover{transform:translateY(-1px)}
+#pp{transition:transform .15s,background .15s}
+.cv{width:40px;height:40px;border-radius:4px;object-fit:cover;flex:none}
+.fx{display:flex;gap:10px;align-items:center;min-width:0}
+.fi{display:flex;flex-direction:column;min-width:0}
+.pcov{width:44px;height:44px;border-radius:6px;object-fit:cover;flex:none}
 </style></head><body>
 <div class="app">
 <aside>
@@ -253,7 +263,7 @@ footer.min .ctl button:not(#pp){display:none}
 </div>
 <footer>
  <button id="fmin" title="Mostrar u ocultar el reproductor">▾</button>
- <div class="fl"><b id="pt2">—</b><span class="mu" id="tm">0:00 / 0:00</span></div>
+ <div class="fl"><div class="fx"><img id="pcov" class="pcov" hidden alt=""><div class="fi"><b id="pt2">—</b><span class="mu" id="tm">0:00 / 0:00</span></div></div></div>
  <div class="fc">
   <div class="ctl"><button id="sh">🔀</button><button id="pv">⏮</button><button id="pp" class="pri">▶</button><button id="nx">⏭</button><button id="rp">🔁 No</button></div>
   <input type="range" id="sk" min="0" max="1000" value="0">
@@ -297,7 +307,7 @@ function render(){
  const K={titulo:s=>s.title.toLowerCase(),artista:s=>(s.artist||'~').toLowerCase(),dur:s=>-(s.secs||0),mas:s=>-(s.plays||0)}[$('#so').value];
  if(K)ids=[...ids].sort((p,q)=>{const x=K(songs.find(y=>y.id===p)),z=K(songs.find(y=>y.id===q));return x<z?-1:x>z?1:0});
  $('#list').innerHTML=ids.map(id=>{const s=songs.find(x=>x.id===id);if(!s)return'';const inL=view!=='all'&&(lists[view]||[]).includes(id);
-  return `<div class="it${cur&&cur.id===id?' now':''}" data-id="${id}"><div class="t" data-p><b>${esc(s.title)}</b><small>${esc(s.artist||'Sin artista')} · ${fh(s.secs)}</small></div>`+(editing?`<input type="checkbox" data-c ${inL?'checked':''}>`:view==='all'?'<button data-lp title="Agregar o quitar de listas">📁</button><button data-n title="Reproducir después">⤵</button><button data-e>✎</button><button data-d>✕</button>':'<button data-lp title="Agregar o quitar de listas">📁</button><button data-n title="Reproducir después">⤵</button><button data-r title="Quitar de esta lista">✕ quitar</button>')+'</div>'}).join('')||'<p class="mu">Aún no hay canciones. Toca «Agregar canciones».</p>'}
+  return `<div class="it${cur&&cur.id===id?' now':''}" data-id="${id}"><img class="cv" data-cov="${id}" hidden alt=""><div class="t" data-p><b>${esc(s.title)}</b><small>${esc(s.artist||'Sin artista')} · ${fh(s.secs)}</small></div>`+(editing?`<input type="checkbox" data-c ${inL?'checked':''}>`:view==='all'?'<button data-lp title="Agregar o quitar de listas">📁</button><button data-n title="Reproducir después">⤵</button><button data-e>✎</button><button data-d>✕</button>':'<button data-lp title="Agregar o quitar de listas">📁</button><button data-n title="Reproducir después">⤵</button><button data-r title="Quitar de esta lista">✕ quitar</button>')+'</div>'}).join('')||'<p class="mu">Aún no hay canciones. Toca «Agregar canciones».</p>';covers()}
 $('#add').onclick=()=>$('#file').click();
 $('#file').onchange=async e=>{for(const f of e.target.files){const n=f.name.replace(/\.[^.]+$/,''),p=n.includes(' - ')?n.split(/ - (.+)/):['',n];const s={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),artist:p[0].trim(),title:(p[1]||n).trim(),a:null,b:null,lrc:'',secs:0,plays:0,vid:/^video\//.test(f.type)||/\.(mp4|webm|m4v|mov|mkv)$/i.test(f.name)};mem.set(s.id,f);if(await put(s)==null||await tx('blobs','readwrite',o=>o.put(f,s.id))==null)note('No pude guardar «'+s.title+'»: sonará solo mientras no cierres la pestaña.');songs.push(s)}e.target.value='';render()};
 $('#sel').onchange=e=>{view=e.target.value;editing=false;render()};
@@ -316,7 +326,7 @@ $('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;const id=i
 async function play(id){const s=songs.find(x=>x.id===id);if(!s)return;save();const b=mem.get(id)||await tx('blobs','readonly',o=>o.get(id));if(!b)return note('No encuentro el archivo de esta canción. Agrégala otra vez.');note('');
  if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);cur=s;A.src=url;vidUI(s,b);A.play().catch(e=>note('No pude reproducir: '+e.message));s.plays++;put(s);loop=false;head();render();loadLy();if(!s.lrc)fetchLy()}
 function step(d){if(d>0&&nextQ.length){play(nextQ.shift());return}if(!queue.length)queue=vids();if(!queue.length)return;let i=queue.indexOf(cur&&cur.id);i=shuf&&d>0?Math.floor(Math.random()*queue.length):(i+d+queue.length)%queue.length;play(queue[i])}
-function head(){$('#pt2').textContent=cur?cur.title+(cur.artist?' — '+cur.artist:''):'—';$('#ia').value=cur&&cur.a!=null?ft(cur.a):'';$('#ib').value=cur&&cur.b!=null?ft(cur.b):'';$('#lp').classList.toggle('on',loop);$('#lt').textContent=cur?cur.title:'Sin canción';
+function head(){pcovSet();$('#pt2').textContent=cur?cur.title+(cur.artist?' — '+cur.artist:''):'—';$('#ia').value=cur&&cur.a!=null?ft(cur.a):'';$('#ib').value=cur&&cur.b!=null?ft(cur.b):'';$('#lp').classList.toggle('on',loop);$('#lt').textContent=cur?cur.title:'Sin canción';
  try{if(cur&&navigator.mediaSession)navigator.mediaSession.metadata=new MediaMetadata({title:cur.title,artist:cur.artist})}catch(e){}}
 try{const m=navigator.mediaSession;m.setActionHandler('play',()=>A.play());m.setActionHandler('pause',()=>A.pause());m.setActionHandler('nexttrack',()=>step(1));m.setActionHandler('previoustrack',()=>step(-1))}catch(e){}
 $('#pp').onclick=()=>{if(!cur){queue=vids();if(queue.length)play(queue[0]);return}A.paused?A.play():A.pause()};
@@ -474,6 +484,24 @@ $('#xf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)re
  importando=true;try{await importar(f)}catch(err){importando=false;alert('No pude importar: '+err.message)}};
 async function verAlmac(){try{if(!navigator.storage||!navigator.storage.estimate)return;const e=await navigator.storage.estimate();$('#almac').textContent='Espacio usado: '+(e.usage/1048576).toFixed(1)+' MB'}catch(err){}}
 verAlmac();setInterval(verAlmac,60000);
+/* ===== PORTADAS (ID3 incrustado en MP3) ===== */
+const covs=new Map();
+async function portada(b){const h=new Uint8Array(await b.slice(0,10).arrayBuffer());if(h[0]!==0x49||h[1]!==0x44||h[2]!==0x33)return null;
+ const ver=h[3],flags=h[5];const size=((h[6]&127)<<21)|((h[7]&127)<<14)|((h[8]&127)<<7)|(h[9]&127);
+ const buf=new Uint8Array(await b.slice(0,10+size).arrayBuffer());const dv=new DataView(buf.buffer);let p=10;
+ if(flags&64){const es=ver===4?((buf[p]&127)<<21)|((buf[p+1]&127)<<14)|((buf[p+2]&127)<<7)|(buf[p+3]&127):dv.getUint32(p);p+=es}
+ while(p+10<=buf.length){const id=String.fromCharCode(buf[p],buf[p+1],buf[p+2],buf[p+3]);if(!/^[A-Z0-9]{4}$/.test(id))break;
+  const fs=ver===4?((buf[p+4]&127)<<21)|((buf[p+5]&127)<<14)|((buf[p+6]&127)<<7)|(buf[p+7]&127):dv.getUint32(p+4);
+  const d=p+10,fin=Math.min(buf.length,d+fs);
+  if(id==='APIC'&&fs>0){const enc=buf[d];let q=d+1,mime='';while(q<fin&&buf[q]!==0){mime+=String.fromCharCode(buf[q]);q++}q+=2;
+   if(enc===1||enc===2){while(q+1<fin&&!(buf[q]===0&&buf[q+1]===0))q+=2;q+=2}else{while(q<fin&&buf[q]!==0)q++;q++}
+   if(q<fin)return new Blob([buf.slice(q,fin)],{type:mime.startsWith('image/')?mime:'image/jpeg'})}
+  p=d+fs}
+ return null}
+async function cover(id){if(covs.has(id))return covs.get(id);let u=null;try{const s=songs.find(x=>x.id===id);const b=mem.get(id)||await tx('blobs','readonly',o=>o.get(id));
+ if(b&&s&&!s.vid&&!(b.type||'').startsWith('video/')){const p=await portada(b);if(p)u=URL.createObjectURL(p)}}catch(e){}covs.set(id,u);return u}
+function covers(){document.querySelectorAll('img[data-cov]').forEach(async im=>{const u=await cover(im.dataset.cov);if(u){im.src=u;im.hidden=false}})}
+async function pcovSet(){const im=$('#pcov'),id=cur&&cur.id;const u=id?await cover(id):null;if(id!==(cur&&cur.id))return;if(u){im.src=u;im.hidden=false}else{im.removeAttribute('src');im.hidden=true}}
 /* ===== NUEVAS FUNCIONES ===== */
 let notas=[],ult=null,restaurando=false,gv=7,nextQ=[];
 let nvista='g';
