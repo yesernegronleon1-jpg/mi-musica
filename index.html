@@ -153,6 +153,10 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
 .hcalTitle{font-size:13px;text-transform:capitalize;margin-bottom:6px}
 .hcard .hh span{display:flex;gap:2px}
 @media(max-width:760px){.hbanner{margin:8px 14px 0}}
+#au{display:none}
+#au.vid{display:block;position:fixed;right:16px;bottom:calc(var(--fh,96px) + 12px);width:300px;max-width:calc(100vw - 32px);z-index:5;border-radius:12px;background:#000;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#au.vid.off{display:none}
+#au.vid.big{left:50%;right:auto;transform:translateX(-50%);width:min(92vw,900px);max-height:70vh}
 </style></head><body>
 <div class="app">
 <aside>
@@ -160,11 +164,11 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
  <nav id="tabs"><button data-t="m" class="on">🏠 Biblioteca</button><button data-t="l">🎤 Letra</button><button data-t="p">⏱ Pomodoro</button><button data-t="n">📝 Notas</button><button data-t="h">✅ Hábitos</button><button data-t="s">📊 Estadísticas</button></nav>
 </aside>
 <main>
- <div class="top"><p id="bn" class="w"></p><button id="pjt" class="ghost">🐾 ocultar</button></div>
+ <div class="top"><p id="bn" class="w"></p><button id="vtog" class="ghost" hidden>🎬 ocultar video</button><button id="vgr" class="ghost" hidden>⤢ agrandar</button><button id="vfs" class="ghost" hidden>⛶ pantalla completa</button><button id="pjt" class="ghost">🐾 ocultar</button></div>
  <div id="hbanner" class="hbanner" hidden></div>
  <section id="m" class="on">
   <div class="hero"><small class="mu">Tu biblioteca</small><h1>Mis canciones</h1></div>
-  <div class="bar"><select id="sel"></select><button id="nl">＋ Lista</button><button class="pri" id="add">＋ Agregar canciones</button><input type="file" id="file" accept="audio/*" multiple hidden><button id="el" hidden>Editar lista</button><button id="dl" hidden>Borrar lista</button></div>
+  <div class="bar"><select id="sel"></select><button id="nl">＋ Lista</button><button class="pri" id="add">＋ Agregar canciones</button><input type="file" id="file" accept="audio/*,video/*" multiple hidden><button id="el" hidden>Editar lista</button><button id="dl" hidden>Borrar lista</button></div>
   <div id="list"></div>
  </section>
  <section id="l">
@@ -210,7 +214,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
  <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"></div>
 </footer>
 <div id="nota" class="notabox" hidden><p><b>¡Enfoque terminado!</b> ¿En qué trabajaste?</p><div class="bar"><input type="text" id="ntx" placeholder="Ej: repasé matemáticas" style="flex:1"><button class="pri" id="nsv">Guardar</button><button id="nno">Omitir</button></div></div>
-<audio id="au"></audio>
+<video id="au" playsinline controls></video>
 <div id="pj" aria-hidden="true"><div class="gl" id="pjb" hidden></div><div id="pjf"><img id="pjim" alt="" src="saluda.png"></div></div>
 <script>
 const $=s=>document.querySelector(s),A=$('#au');
@@ -255,7 +259,7 @@ $('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;const id=i
  else if(t.closest('[data-p]')&&!editing){queue=vids();play(id)}};
 /* reproducción */
 async function play(id){const s=songs.find(x=>x.id===id);if(!s)return;save();const b=mem.get(id)||await tx('blobs','readonly',o=>o.get(id));if(!b)return note('No encuentro el archivo de esta canción. Agrégala otra vez.');note('');
- if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);cur=s;A.src=url;A.play().catch(e=>note('No pude reproducir: '+e.message));s.plays++;put(s);loop=false;head();render();loadLy();if(!s.lrc)fetchLy()}
+ if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);cur=s;A.src=url;vidUI(b);A.play().catch(e=>note('No pude reproducir: '+e.message));s.plays++;put(s);loop=false;head();render();loadLy();if(!s.lrc)fetchLy()}
 function step(d){if(d>0&&nextQ.length){play(nextQ.shift());return}if(!queue.length)queue=vids();if(!queue.length)return;let i=queue.indexOf(cur&&cur.id);i=shuf&&d>0?Math.floor(Math.random()*queue.length):(i+d+queue.length)%queue.length;play(queue[i])}
 function head(){$('#pt2').textContent=cur?cur.title+(cur.artist?' — '+cur.artist:''):'—';$('#ia').value=cur&&cur.a!=null?ft(cur.a):'';$('#ib').value=cur&&cur.b!=null?ft(cur.b):'';$('#lp').classList.toggle('on',loop);$('#lt').textContent=cur?cur.title:'Sin canción';
  try{if(cur&&navigator.mediaSession)navigator.mediaSession.metadata=new MediaMetadata({title:cur.title,artist:cur.artist})}catch(e){}}
@@ -422,7 +426,7 @@ $('#sx').onclick=e=>{const d=e.target.dataset||{};if(d.g){gv=+d.g;stats()}else i
 function guardarUlt(){if(cur&&!restaurando&&A.currentTime>0)kvset('ult',{id:cur.id,t:Math.floor(A.currentTime)})}
 setInterval(guardarUlt,5000);addEventListener('pagehide',guardarUlt);
 async function restaurar(){if(!ult)return;const s=songs.find(x=>x.id===ult.id);if(!s)return;const b=await tx('blobs','readonly',o=>o.get(s.id));if(!b)return;
- if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);cur=s;restaurando=true;
+ if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);cur=s;restaurando=true;vidUI(b);
  A.addEventListener('loadedmetadata',function una(){A.removeEventListener('loadedmetadata',una);A.currentTime=Math.min(ult.t,A.duration||ult.t);restaurando=false;head();render();loadLy()});
  A.src=url}
 /* ===== HÁBITOS ===== */
@@ -503,4 +507,9 @@ setInterval(()=>{hcommit();if(hdirty&&(!hact.run||Date.now()-hlast>10000))hguard
 setInterval(hbanner,5000);
 setInterval(hAvisar,60000);
 addEventListener('pagehide',()=>{hcommit();hguardar()});
+/* ===== VIDEO ===== */
+function vidUI(b){const v=!!(b&&b.type&&b.type.startsWith('video/'));A.classList.toggle('vid',v);$('#vtog').hidden=!v;$('#vgr').hidden=!v;$('#vfs').hidden=!v;if(!v){A.classList.remove('off');A.classList.remove('big');$('#vgr').textContent='⤢ agrandar'}}
+$('#vgr').onclick=()=>{A.classList.toggle('big');$('#vgr').textContent=A.classList.contains('big')?'⤡ reducir':'⤢ agrandar'};
+$('#vfs').onclick=()=>{const f=A.requestFullscreen||A.webkitRequestFullscreen;try{f&&f.call(A)}catch(e){note('Este navegador no permite pantalla completa aquí.')}};
+$('#vtog').onclick=()=>{A.classList.toggle('off');$('#vtog').textContent=A.classList.contains('off')?'🎬 mostrar video':'🎬 ocultar video'};
 </script></body></html>
