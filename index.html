@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="theme-color" content="#121212">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mi Música</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎧%3C/text%3E%3C/svg%3E">
@@ -211,12 +213,16 @@ button:hover{transform:translateY(-1px)}
 .fx{display:flex;gap:10px;align-items:center;min-width:0}
 .fi{display:flex;flex-direction:column;min-width:0}
 .pcov{width:44px;height:44px;border-radius:6px;object-fit:cover;flex:none}
+.chatbox{background:var(--card);border-radius:12px;padding:14px;min-height:300px;max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.msg{max-width:85%;padding:9px 13px;border-radius:14px;white-space:pre-wrap;word-wrap:break-word}
+.msg.u{align-self:flex-end;background:var(--ac);color:#000}
+.msg.m{align-self:flex-start;background:var(--card2)}
 </style></head><body>
 <div class="app">
 <aside>
  <div class="logo">🎧 Mi<span>Música</span></div>
  <div id="cuenta" class="mu" style="padding:0 12px 14px;font-size:12px"></div>
- <nav id="tabs"><button data-t="m" class="on">🏠 Biblioteca</button><button data-t="l">🎤 Letra</button><button data-t="p">⏱ Pomodoro</button><button data-t="n">📝 Notas</button><button data-t="h">✅ Hábitos</button><button data-t="s">📊 Estadísticas</button></nav>
+ <nav id="tabs"><button data-t="m" class="on">🏠 Biblioteca</button><button data-t="l">🎤 Letra</button><button data-t="p">⏱ Pomodoro</button><button data-t="n">📝 Notas</button><button data-t="h">✅ Hábitos</button><button data-t="s">📊 Estadísticas</button><button data-t="c">💬 Chat</button></nav>
  <div class="resp"><small class="mu">Respaldo</small><button id="xd">Exportar datos</button><button id="xa">Exportar todo (con audio)</button><button id="xi">Importar respaldo</button><input type="file" id="xf" accept=".json" hidden><div id="almac" class="mu"></div></div>
 </aside>
 <main>
@@ -259,6 +265,11 @@ button:hover{transform:translateY(-1px)}
  <section id="n"><div class="hero"><small class="mu">Tus notas</small><h1>Notas</h1></div><div class="bar"><button data-nv="g" class="on">General</button><button data-nv="s">Semana</button><button data-nv="m">Mes</button></div><div id="nv"></div></section>
  <section id="h"><div class="hero"><small class="mu">Tus hábitos</small><h1>Hábitos</h1></div><div class="bar"><input type="text" id="hname" placeholder="Nuevo hábito, ej: Leer" style="flex:1;max-width:320px"><button class="pri" id="hnew">＋ Hábito</button><button id="havisos">🔔 Activar avisos</button></div><div id="hl" class="hgrid"></div></section>
  <section id="s"><div class="hero"><small class="mu">Tu actividad</small><h1>Estadísticas</h1></div><div id="sx"></div></section>
+<section id="c"><div class="hero"><small class="mu">Chat con tu mascota</small><h1>Chat</h1></div>
+ <div class="bar"><input type="password" id="gk" placeholder="Pega tu API key de Gemini" style="flex:1;max-width:360px"><button id="gks">Guardar clave</button></div>
+ <div id="cm" class="chatbox"></div>
+ <div class="bar"><input type="text" id="cin" placeholder="Escribe un mensaje" style="flex:1"><button class="pri" id="csend">Enviar</button></div>
+</section>
 </main>
 </div>
 <footer>
@@ -502,6 +513,20 @@ async function cover(id){if(covs.has(id))return covs.get(id);let u=null;try{cons
  if(b&&s&&!s.vid&&!(b.type||'').startsWith('video/')){const p=await portada(b);if(p)u=URL.createObjectURL(p)}}catch(e){}covs.set(id,u);return u}
 function covers(){document.querySelectorAll('img[data-cov]').forEach(async im=>{const u=await cover(im.dataset.cov);if(u){im.src=u;im.hidden=false}})}
 async function pcovSet(){const im=$('#pcov'),id=cur&&cur.id;const u=id?await cover(id):null;if(id!==(cur&&cur.id))return;if(u){im.src=u;im.hidden=false}else{im.removeAttribute('src');im.hidden=true}}
+/* ===== CHAT CON GEMINI (solo texto) ===== */
+const GEM_MODELO='gemini-2.5-flash';
+let gemClave='',gemHist=[];
+const cmAdd=(t,q)=>{const d=document.createElement('div');d.className='msg '+(q?'u':'m');d.textContent=t;$('#cm').appendChild(d);$('#cm').scrollTop=1e9;return d};
+async function claveGem(){if(!gemClave)gemClave=(await kvget('gemkey'))||'';return gemClave}
+$('#gks').onclick=async()=>{const k=$('#gk').value.trim();if(!k||k.startsWith('•'))return;gemClave=k;await kvset('gemkey',k);$('#gk').value='••••••••';note('Clave guardada en tu navegador.')};
+async function gemEnviar(){const t=$('#cin').value.trim();if(!t)return;const k=await claveGem();if(!k){note('Primero pega tu clave de Gemini arriba.');return}
+ $('#cin').value='';cmAdd(t,true);gemHist.push({role:'user',parts:[{text:t}]});const esp=cmAdd('…',false);
+ try{const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+GEM_MODELO+':generateContent?key='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:gemHist})});
+  const d=await r.json();if(!r.ok)throw new Error((d.error&&d.error.message)||('código '+r.status));
+  const txt=((d.candidates&&d.candidates[0]&&d.candidates[0].content.parts)||[]).map(p=>p.text||'').join('').trim()||'(sin respuesta)';
+  esp.textContent=txt;gemHist.push({role:'model',parts:[{text:txt}]})}
+ catch(e){esp.textContent='No pude responder: '+e.message;gemHist.pop()}}
+$('#csend').onclick=gemEnviar;$('#cin').onkeydown=e=>{if(e.key==='Enter')gemEnviar()};
 /* ===== NUEVAS FUNCIONES ===== */
 let notas=[],ult=null,restaurando=false,gv=7,nextQ=[];
 let nvista='g';
@@ -669,4 +694,5 @@ function abrirLP(id){if(!Object.keys(lists).length){note('Primero crea una lista
 function lpDibuja(){const s=songs.find(x=>x.id===lpId);$('#lpop').innerHTML=`<div class="lph"><b>Listas de «${esc(s?s.title:'')}»</b><button id="lpx" class="x">✕</button></div>`+Object.keys(lists).map(n=>`<label class="lpi"><input type="checkbox" data-lpn="${esc(n)}" ${lists[n].includes(lpId)?'checked':''}><span class="t">${esc(n)}</span><span class="mu">(${lists[n].length})</span></label>`).join('')+'<button class="pri" id="lpok">Listo</button>'}
 $('#lpop').onchange=e=>{const n=e.target.dataset.lpn;if(!n)return;const l=lists[n]||[];lists[n]=e.target.checked?[...new Set([...l,lpId])]:l.filter(i=>i!==lpId);kvset('lists',lists);lpDibuja();render()};
 $('#lpop').onclick=e=>{if(e.target.id==='lpx'||e.target.id==='lpok')$('#lpop').hidden=true};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>
