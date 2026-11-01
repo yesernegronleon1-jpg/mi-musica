@@ -88,7 +88,6 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
  .hero h1{font-size:28px}
  #pt{font-size:64px}
  footer{grid-template-columns:1fr;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
- .fr{display:none}
 }
 /* personaje */
 #pj{position:fixed;left:0;bottom:var(--fh,90px);z-index:4;pointer-events:none;will-change:transform}
@@ -190,6 +189,10 @@ footer.min{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);padding-top:6px;p
 footer.min #tm,footer.min #sk,footer.min .ab,footer.min .fr{display:none}
 footer.min .fl{flex-direction:row;align-items:center}
 footer.min .ctl button:not(#pp){display:none}
+.fr{flex-wrap:wrap}
+.fr #vo{flex:1;min-width:80px}
+#vb{width:90px}
+#vr{min-width:0;padding:4px 8px;font-size:13px;border-radius:8px}
 </style></head><body>
 <div class="app">
 <aside>
@@ -247,7 +250,7 @@ footer.min .ctl button:not(#pp){display:none}
   <input type="range" id="sk" min="0" max="1000" value="0">
   <div class="ab"><button id="sa">A</button><input class="s" id="ia" placeholder="0:00"><input class="s" id="ib" placeholder="0:00"><button id="sb">B</button><button id="lp">Loop</button></div>
  </div>
- <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"></div>
+ <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"><span class="mu">🔊+</span><input type="range" id="vb" min="1" max="3" step="0.1" value="1"><span id="vbv" class="mu">100%</span><select id="vr" title="Velocidad"><option value="0.5">0.5x</option><option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></div>
 </footer>
 <div id="nota" class="notabox" hidden><p><b>¡Enfoque terminado!</b> ¿En qué trabajaste?</p><div class="bar"><input type="text" id="ntx" placeholder="Ej: repasé matemáticas" style="flex:1"><button class="pri" id="nsv">Guardar</button><button id="nno">Omitir</button></div></div>
 
@@ -575,4 +578,13 @@ A.addEventListener('error',()=>{
  if(restaurando){restaurando=false;ult=null;try{kvset('ult',null)}catch(e){}}
  if(cur)note('Brave no puede leer "'+cur.title+'". Si es .mkv o .mov, conviértelo a .mp4 o .mp3 y vuelve a agregarlo.');
 });
+/* ===== VOLUMEN EXTRA Y VELOCIDAD ===== */
+let bctx=null,bgain=null,vrate=1;
+try{vrate=+(localStorage.getItem('vrate')||1)}catch(e){}
+$('#vr').value=String(vrate);
+function bsetup(){if(bctx)return;try{bctx=new (window.AudioContext||window.webkitAudioContext)();const fuente=bctx.createMediaElementSource(A);bgain=bctx.createGain();bgain.gain.value=+$('#vb').value;fuente.connect(bgain);bgain.connect(bctx.destination)}catch(e){bctx=null;bgain=null}}
+A.addEventListener('play',()=>{bsetup();if(bctx&&bctx.state==='suspended')bctx.resume()});
+$('#vb').oninput=e=>{const v=+e.target.value;if(bgain)bgain.gain.value=v;$('#vbv').textContent=Math.round(v*100)+'%'};
+$('#vr').onchange=e=>{vrate=+e.target.value;A.playbackRate=vrate;try{localStorage.setItem('vrate',String(vrate))}catch(err){}};
+A.addEventListener('loadedmetadata',()=>{A.playbackRate=vrate});
 </script></body></html>
