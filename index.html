@@ -109,14 +109,59 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
 .sink{animation:pjHunde 1s ease-out forwards}
 @keyframes pjRespira{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.025)}}
 .breathe{animation:pjRespira 3s ease-in-out infinite;transform-origin:50% 100%}
+
+.chartwrap{grid-column:1/-1;background:var(--card);border-radius:12px;padding:14px 16px}
+.ch{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.ch button.on{background:var(--ac);color:#000}
+.bars{display:flex;align-items:flex-end;gap:6px;height:170px}
+.bc{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0}
+.bb{width:100%;max-width:36px;background:var(--ac);border-radius:4px 4px 0 0}
+.bc small{color:var(--mu);font-size:11px;margin-top:4px}
+.notabox{background:var(--card);border-radius:12px;padding:14px;margin:14px auto;max-width:560px}
+.nlist{max-width:560px;margin:0 auto 20px}
+.nlist h3{margin:14px 0 4px}
+#nota{position:fixed;top:80px;right:16px;width:340px;max-width:calc(100vw - 32px);margin:0;z-index:8;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#nv h3{margin:18px 0 6px;font-size:16px}
+#n .bar button.on{background:var(--ac);color:#000}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;padding-bottom:20px}
+.hcard{background:var(--card);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.hh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hh b{font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hh .x{background:transparent;color:var(--mu);padding:2px 8px}
+.hs{display:flex;gap:14px;flex-wrap:wrap;color:var(--mu);font-size:13px}
+.hs i{font-style:normal;color:#fff;font-weight:700}
+.hp{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hC{font-variant-numeric:tabular-nums;font-size:20px;font-weight:700;color:var(--ac)}
+.hm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hm .s{width:76px!important}
+.hbanner{margin:8px 28px 0;background:var(--card);border-left:3px solid var(--ac);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px}
+.hbanner .x{background:transparent;padding:2px 8px}
+.hbar{height:8px;background:#2a2a2a;border-radius:999px;overflow:hidden}
+.hfill{height:100%;width:0;background:var(--ac);border-radius:999px;transition:width .4s}
+.hmeta{font-size:13px}
+.hdias{display:flex;gap:6px}
+.hdias button{padding:4px 0;flex:1;font-size:12px;background:#2a2a2a}
+.hdias button.on{background:var(--ac);color:#000;font-weight:700}
+.hcalB{background:transparent;padding:4px 0;font-size:13px;color:var(--mu)}
+.hcal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px;text-align:center}
+.hcal .cl{color:var(--mu)}
+.hcal .cd{border-radius:6px;padding:5px 0;background:#2a2a2a}
+.hcal .cd.ok{background:var(--ac);color:#000;font-weight:700}
+.hcal .cd.miss{background:#5a2a2a}
+.hcal .cd.fut{opacity:.35}
+.hcal .cd.hoy{outline:1px solid #fff}
+.hcalTitle{font-size:13px;text-transform:capitalize;margin-bottom:6px}
+.hcard .hh span{display:flex;gap:2px}
+@media(max-width:760px){.hbanner{margin:8px 14px 0}}
 </style></head><body>
 <div class="app">
 <aside>
  <div class="logo">🎧 Mi<span>Música</span></div>
- <nav id="tabs"><button data-t="m" class="on">🏠 Biblioteca</button><button data-t="l">🎤 Letra</button><button data-t="p">⏱ Pomodoro</button><button data-t="s">📊 Estadísticas</button></nav>
+ <nav id="tabs"><button data-t="m" class="on">🏠 Biblioteca</button><button data-t="l">🎤 Letra</button><button data-t="p">⏱ Pomodoro</button><button data-t="n">📝 Notas</button><button data-t="h">✅ Hábitos</button><button data-t="s">📊 Estadísticas</button></nav>
 </aside>
 <main>
  <div class="top"><p id="bn" class="w"></p><button id="pjt" class="ghost">🐾 ocultar</button></div>
+ <div id="hbanner" class="hbanner" hidden></div>
  <section id="m" class="on">
   <div class="hero"><small class="mu">Tu biblioteca</small><h1>Mis canciones</h1></div>
   <div class="bar"><select id="sel"></select><button id="nl">＋ Lista</button><button class="pri" id="add">＋ Agregar canciones</button><input type="file" id="file" accept="audio/*" multiple hidden><button id="el" hidden>Editar lista</button><button id="dl" hidden>Borrar lista</button></div>
@@ -144,12 +189,14 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
   <div class="clock"><div id="pt">25:00</div><div id="pn" class="mu"></div></div>
   <div class="bar center"><button class="pri big2" id="ps">Iniciar</button><button id="pk">Saltar</button><button id="pr">Reiniciar</button></div>
   <div class="cfg">
-   <label>Enfoque (min) <input type="number" class="s" id="cf"></label>
-   <label>Descanso <input type="number" class="s" id="cs"></label>
-   <label>Largo <input type="number" class="s" id="cl"></label>
+   <label>Enfoque (seg) <input type="number" class="s" id="cf"></label>
+   <label>Descanso (seg) <input type="number" class="s" id="cs"></label>
+   <label>Largo (seg) <input type="number" class="s" id="cl"></label>
    <label>Volumen en descanso <input type="range" id="cd" min="0" max="100" style="width:140px"><span id="cdv"></span></label>
   </div>
  </section>
+ <section id="n"><div class="hero"><small class="mu">Tus notas</small><h1>Notas</h1></div><div class="bar"><button data-nv="g" class="on">General</button><button data-nv="s">Semana</button><button data-nv="m">Mes</button></div><div id="nv"></div></section>
+ <section id="h"><div class="hero"><small class="mu">Tus hábitos</small><h1>Hábitos</h1></div><div class="bar"><input type="text" id="hname" placeholder="Nuevo hábito, ej: Leer" style="flex:1;max-width:320px"><button class="pri" id="hnew">＋ Hábito</button><button id="havisos">🔔 Activar avisos</button></div><div id="hl" class="hgrid"></div></section>
  <section id="s"><div class="hero"><small class="mu">Tu actividad</small><h1>Estadísticas</h1></div><div id="sx"></div></section>
 </main>
 </div>
@@ -162,6 +209,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
  </div>
  <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"></div>
 </footer>
+<div id="nota" class="notabox" hidden><p><b>¡Enfoque terminado!</b> ¿En qué trabajaste?</p><div class="bar"><input type="text" id="ntx" placeholder="Ej: repasé matemáticas" style="flex:1"><button class="pri" id="nsv">Guardar</button><button id="nno">Omitir</button></div></div>
 <audio id="au"></audio>
 <div id="pj" aria-hidden="true"><div class="gl" id="pjb" hidden></div><div id="pjf"><img id="pjim" alt="" src="saluda.png"></div></div>
 <script>
@@ -181,7 +229,7 @@ const put=s=>tx('songs','readwrite',o=>o.put(s)),kvset=(k,v)=>tx('kv','readwrite
 (async()=>{try{DB=await new Promise((ok,no)=>{const r=indexedDB.open('musica',1);r.onupgradeneeded=()=>{['songs'].forEach(n=>r.result.createObjectStore(n,{keyPath:'id'}));['blobs','kv'].forEach(n=>r.result.createObjectStore(n))};r.onsuccess=()=>ok(r.result);r.onerror=no});
  songs=await tx('songs','readonly',o=>o.getAll())||[];lists=await kvget('lists')||{};st=Object.assign(st,await kvget('st')||{});cfg=Object.assign(cfg,await kvget('cfg')||{});
  if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){note('Este navegador no deja guardar canciones aquí: durarán solo mientras no cierres la pestaña. Súbela a GitHub Pages para que se guarden.')}
- pom.left=cfg.f*60;cfgUI();render();pomUI()})();
+ pom.left=cfg.f*60;cfgUI();render();pomUI();notas=await kvget('notas')||[];ult=await kvget('ult');notasUI();restaurar();habitos=await kvget('habitos')||[];habitosUI();hupdate();hbanner()})();
 /* pestañas */
 $('#tabs').onclick=e=>{const t=e.target.dataset.t;if(!t)return;document.querySelectorAll('section,nav button').forEach(x=>x.classList.remove('on'));$('#'+t).classList.add('on');e.target.classList.add('on');if(t==='s')stats();if(t==='l'){li=-2;hl()}};
 /* biblioteca y playlists */
@@ -191,7 +239,7 @@ function render(){
  $('#el').hidden=$('#dl').hidden=view==='all';$('#el').textContent=editing?'Listo':'Editar lista';
  const ids=view==='all'||editing?songs.map(s=>s.id):lists[view]||[];
  $('#list').innerHTML=ids.map(id=>{const s=songs.find(x=>x.id===id);if(!s)return'';const inL=view!=='all'&&(lists[view]||[]).includes(id);
-  return `<div class="it${cur&&cur.id===id?' now':''}" data-id="${id}"><div class="t" data-p><b>${esc(s.title)}</b><small>${esc(s.artist||'Sin artista')} · ${fh(s.secs)}</small></div>`+(editing?`<input type="checkbox" data-c ${inL?'checked':''}>`:view==='all'?'<button data-e>✎</button><button data-d>✕</button>':'<button data-r>✕</button>')+'</div>'}).join('')||'<p class="mu">Aún no hay canciones. Toca «Agregar canciones».</p>'}
+  return `<div class="it${cur&&cur.id===id?' now':''}" data-id="${id}"><div class="t" data-p><b>${esc(s.title)}</b><small>${esc(s.artist||'Sin artista')} · ${fh(s.secs)}</small></div>`+(editing?`<input type="checkbox" data-c ${inL?'checked':''}>`:view==='all'?'<button data-n title="Reproducir después">⤵</button><button data-e>✎</button><button data-d>✕</button>':'<button data-n title="Reproducir después">⤵</button><button data-r title="Quitar de esta lista">✕ quitar</button>')+'</div>'}).join('')||'<p class="mu">Aún no hay canciones. Toca «Agregar canciones».</p>'}
 $('#add').onclick=()=>$('#file').click();
 $('#file').onchange=async e=>{for(const f of e.target.files){const n=f.name.replace(/\.[^.]+$/,''),p=n.includes(' - ')?n.split(/ - (.+)/):['',n];const s={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),artist:p[0].trim(),title:(p[1]||n).trim(),a:null,b:null,lrc:'',secs:0,plays:0};mem.set(s.id,f);if(await put(s)==null||await tx('blobs','readwrite',o=>o.put(f,s.id))==null)note('No pude guardar «'+s.title+'»: sonará solo mientras no cierres la pestaña.');songs.push(s)}e.target.value='';render()};
 $('#sel').onchange=e=>{view=e.target.value;editing=false;render()};
@@ -203,11 +251,12 @@ $('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;const id=i
  else if(t.matches('[data-d]')){if(t.dataset.s!=='1'){t.dataset.s='1';t.textContent='¿Seguro?';setTimeout(()=>{t.dataset.s='';t.textContent='✕'},3000)}else{songs=songs.filter(x=>x!==s);Object.keys(lists).forEach(k=>lists[k]=lists[k].filter(i=>i!==id));tx('songs','readwrite',o=>o.delete(id));tx('blobs','readwrite',o=>o.delete(id));kvset('lists',lists);if(cur===s){A.pause();A.removeAttribute('src');cur=null;head()}render()}}
  else if(t.matches('[data-r]')){lists[view]=lists[view].filter(i=>i!==id);kvset('lists',lists);render()}
  else if(t.matches('[data-c]')){const l=lists[view];lists[view]=t.checked?[...l,id]:l.filter(i=>i!==id);kvset('lists',lists)}
+ else if(t.matches('[data-n]')){nextQ.push(id);note('Sonará después: «'+s.title+'» · En cola: '+nextQ.length)}
  else if(t.closest('[data-p]')&&!editing){queue=vids();play(id)}};
 /* reproducción */
 async function play(id){const s=songs.find(x=>x.id===id);if(!s)return;save();const b=mem.get(id)||await tx('blobs','readonly',o=>o.get(id));if(!b)return note('No encuentro el archivo de esta canción. Agrégala otra vez.');note('');
  if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);cur=s;A.src=url;A.play().catch(e=>note('No pude reproducir: '+e.message));s.plays++;put(s);loop=false;head();render();loadLy();if(!s.lrc)fetchLy()}
-function step(d){if(!queue.length)queue=vids();if(!queue.length)return;let i=queue.indexOf(cur&&cur.id);i=shuf&&d>0?Math.floor(Math.random()*queue.length):(i+d+queue.length)%queue.length;play(queue[i])}
+function step(d){if(d>0&&nextQ.length){play(nextQ.shift());return}if(!queue.length)queue=vids();if(!queue.length)return;let i=queue.indexOf(cur&&cur.id);i=shuf&&d>0?Math.floor(Math.random()*queue.length):(i+d+queue.length)%queue.length;play(queue[i])}
 function head(){$('#pt2').textContent=cur?cur.title+(cur.artist?' — '+cur.artist:''):'—';$('#ia').value=cur&&cur.a!=null?ft(cur.a):'';$('#ib').value=cur&&cur.b!=null?ft(cur.b):'';$('#lp').classList.toggle('on',loop);$('#lt').textContent=cur?cur.title:'Sin canción';
  try{if(cur&&navigator.mediaSession)navigator.mediaSession.metadata=new MediaMetadata({title:cur.title,artist:cur.artist})}catch(e){}}
 try{const m=navigator.mediaSession;m.setActionHandler('play',()=>A.play());m.setActionHandler('pause',()=>A.pause());m.setActionHandler('nexttrack',()=>step(1));m.setActionHandler('previoustrack',()=>step(-1))}catch(e){}
@@ -218,7 +267,7 @@ $('#rp').onclick=()=>{rep=(rep+1)%3;$('#rp').textContent='🔁 '+['No','Una','Li
 $('#sh').onclick=()=>{shuf=!shuf;$('#sh').classList.toggle('on',shuf)};
 $('#vo').oninput=e=>{clearInterval(fd);A.volume=+e.target.value};
 $('#sk').oninput=e=>{drag=true;if(A.duration)A.currentTime=e.target.value/1000*A.duration};$('#sk').onchange=()=>drag=false;
-A.onended=()=>{if(loop&&cur.a!=null){A.currentTime=cur.a;A.play();return}if(rep===1){A.currentTime=0;A.play();return}const i=queue.indexOf(cur&&cur.id);if(rep===2||shuf||i<queue.length-1)step(1)};
+A.onended=()=>{if(loop&&cur.a!=null){A.currentTime=cur.a;A.play();return}if(rep===1){A.currentTime=0;A.play();return}const i=queue.indexOf(cur&&cur.id);if(rep===2||shuf||i<queue.length-1||nextQ.length)step(1)};
 function fade(to){to=Math.min(1,Math.max(0,to));clearInterval(fd);fd=setInterval(()=>{const d=to-A.volume;if(Math.abs(d)<.02){A.volume=to;clearInterval(fd)}else A.volume=Math.min(1,Math.max(0,A.volume+d*.15))},100)}
 /* loop A-B (parte favorita guardada por canción) */
 const lc=()=>{if(loop&&cur&&cur.a!=null&&cur.b>cur.a&&A.currentTime>=cur.b)A.currentTime=cur.a};A.ontimeupdate=lc;
@@ -260,19 +309,19 @@ $('#ck').onclick=()=>{const L=parse($('#ed').value),w=[],D=A.duration;if(!L.leng
  $('#chk').innerHTML=w.length?w.map(x=>`<p class="w">⚠ ${esc(x)}</p>`).join(''):'<p>✓ Todo en orden.</p>'};
 /* Pomodoro */
 const dur=p=>cfg[p]*60;
-function cfgUI(){$('#cf').value=cfg.f;$('#cs').value=cfg.s;$('#cl').value=cfg.l;$('#cd').value=cfg.d;$('#cdv').textContent=cfg.d+'%'}
-function pomUI(){const l=pom.run?(pom.end-Date.now())/1000:pom.left;$('#pt').textContent=ft(Math.ceil(Math.max(0,l)));$('#pph').textContent={f:'Enfoque',s:'Descanso',l:'Descanso largo'}[pom.ph];$('#pn').textContent='Pomodoros hoy: '+(st.pomos[day()]||0);$('#ps').textContent=pom.run?'Pausar':'Iniciar'}
-['cf','cs','cl'].forEach((id,i)=>$('#'+id).onchange=e=>{const k='fsl'[i];cfg[k]=Math.max(1,+e.target.value||1);e.target.value=cfg[k];kvset('cfg',cfg);if(!pom.run&&pom.ph===k)pom.left=dur(k);pomUI()});
+function cfgUI(){$('#cf').value=Math.round(cfg.f*60);$('#cs').value=Math.round(cfg.s*60);$('#cl').value=Math.round(cfg.l*60);$('#cd').value=cfg.d;$('#cdv').textContent=cfg.d+'%'}
+function pomUI(){const l=pom.run?(pom.end-Date.now())/1000:pom.left;$('#pt').textContent=ft(Math.ceil(Math.max(0,l)));$('#pph').textContent={f:'Enfoque',s:'Descanso',l:'Descanso largo'}[pom.ph];$('#pn').textContent='Pomodoros hoy: '+(st.pomos[day()]||0)+' · Racha: '+racha()+(racha()===1?' día':' días');$('#ps').textContent=pom.run?'Pausar':'Iniciar'}
+['cf','cs','cl'].forEach((id,i)=>$('#'+id).onchange=e=>{const k='fsl'[i];cfg[k]=Math.max(5,+e.target.value||5)/60;e.target.value=Math.round(cfg[k]*60);kvset('cfg',cfg);if(!pom.run&&pom.ph===k)pom.left=dur(k);pomUI()});
 $('#cd').oninput=e=>{cfg.d=+e.target.value;$('#cdv').textContent=cfg.d+'%';kvset('cfg',cfg)};
 function beep(){try{ac=ac||new(window.AudioContext||webkitAudioContext)();ac.resume();const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);g.gain.value=.3;o.frequency.value=880;o.start();o.stop(ac.currentTime+.6)}catch(e){}if(navigator.vibrate)navigator.vibrate(300)}
-function nxt(skip){if(!skip&&pom.ph==='f')pjEvento('triste');if(pom.ph==='f'){if(!skip){pom.n++;st.pomos[day()]=(st.pomos[day()]||0)+1;dirty=true}pom.ph=pom.n%4?'s':'l';pom.vol=A.volume;fade(A.volume*cfg.d/100)}else{pom.ph='f';fade(pom.vol)}if(!skip)beep()}
+function nxt(skip){if(!skip&&pom.ph==='f')pjEvento('triste');if(!skip&&pom.ph==='f')mostrarNota();if(pom.ph==='f'){if(!skip){pom.n++;st.pomos[day()]=(st.pomos[day()]||0)+1;st.foco=st.foco||{};st.foco[day()]=(st.foco[day()]||0)+dur('f');dirty=true}pom.ph=pom.n%4?'s':'l';pom.vol=A.volume;fade(A.volume*cfg.d/100)}else{pom.ph='f';fade(pom.vol)}if(!skip)beep()}
 function pomTick(){while(pom.run&&Date.now()>=pom.end){nxt();pom.end+=dur(pom.ph)*1000}pomUI()}
 $('#ps').onclick=()=>{try{ac=ac||new(window.AudioContext||webkitAudioContext)();ac.resume()}catch(e){}if(pom.run){pom.left=(pom.end-Date.now())/1000;pom.run=false}else{pom.end=Date.now()+pom.left*1000;pom.run=true}pomUI()};
 $('#pk').onclick=()=>{nxt(true);pom.left=dur(pom.ph);if(pom.run)pom.end=Date.now()+pom.left*1000;pomUI()};
 $('#pr').onclick=()=>{if(pom.ph!=='f')fade(pom.vol);pom.run=false;pom.ph='f';pom.n=0;pom.left=dur('f');pomUI()};
 /* estadísticas */
 function stats(){const k=day(),top=[...songs].filter(s=>s.secs>0).sort((a,b)=>b.secs-a.secs).slice(0,10),c=(v,l)=>`<div class="it"><div class="t"><b>${v}</b><small>${l}</small></div></div>`;
- $('#sx').innerHTML=c(fh(st.tot),'Total escuchado')+c(fh(st.days[k]||0),'Hoy')+c(fh(st.focus),'Escuchado durante el enfoque')+c(st.pomos[k]||0,'Pomodoros de hoy')+'<h3>Más escuchadas</h3>'+(top.map((s,i)=>`<div class="it"><div class="t"><b>${i+1}. ${esc(s.title)}</b><small>${esc(s.artist||'Sin artista')}</small></div><span>${fh(s.secs)} · ${s.plays} ${s.plays===1?'vez':'veces'}</span></div>`).join('')||'<p class="mu">Todavía no hay datos.</p>')}
+ $('#sx').innerHTML=c(fh(st.tot),'Total escuchado')+c(fh(st.days[k]||0),'Hoy')+c(fh(st.focus),'Escuchado durante el enfoque')+c(st.pomos[k]||0,'Pomodoros de hoy')+c(Math.round(((st.foco||{})[k]||0)/60)+' min','Enfoque de hoy')+c(racha()+(racha()===1?' día':' días'),'Racha de pomodoros')+grafica()+'<h3>Más escuchadas</h3>'+(top.map((s,i)=>`<div class="it"><div class="t"><b>${i+1}. ${esc(s.title)}</b><small>${esc(s.artist||'Sin artista')}</small></div><span>${fh(s.secs)} · ${s.plays} ${s.plays===1?'vez':'veces'}</span></div>`).join('')||'<p class="mu">Todavía no hay datos.</p>')}
 setInterval(()=>{if($('#s').classList.contains('on'))stats()},3000);
 /* reloj principal */
 let last=performance.now();
@@ -331,11 +380,127 @@ function pjLoop(now){const dt=PJ.t?Math.min(.05,(now-PJ.t)/1000):0;PJ.t=now;
  requestAnimationFrame(pjLoop)}
 /* cualquier toque o tecla cuenta como actividad; si estaba sentada o dormida, se despierta */
 ['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{const estaba=PJ.mode;PJ.touch=Date.now();if(estaba==='sienta'||estaba==='duerme')pjEvento('sorpresa')},{passive:true}));
-A.addEventListener('loadedmetadata',()=>{if(!PJ.hidden)pjEvento('salta')});
+A.addEventListener('loadedmetadata',()=>{if(!PJ.hidden&&!restaurando)pjEvento('salta')});
 PJ.im.onpointerdown=e=>{e.stopPropagation();pjEvento('sorpresa')};
 $('#pjt').onclick=()=>{PJ.hidden=!PJ.hidden;pjPut(PJ.hidden);PJ.el.classList.toggle('off',PJ.hidden);$('#pjt').textContent=PJ.hidden?'🐾 mostrar':'🐾 ocultar';if(PJ.hidden)PJ.bub.hidden=true;else{PJ.touch=Date.now();pjEvento('saluda')}};
 PJ.hidden=pjGet();PJ.el.classList.toggle('off',PJ.hidden);$('#pjt').textContent=PJ.hidden?'🐾 mostrar':'🐾 ocultar';
 pjSize();new ResizeObserver(pjSize).observe($('footer'));addEventListener('resize',pjSize);
 setInterval(pjTick,300);requestAnimationFrame(pjLoop);
 if(!PJ.hidden)pjEvento('saluda');
+/* ===== NUEVAS FUNCIONES ===== */
+let notas=[],ult=null,restaurando=false,gv=7,nextQ=[];
+let nvista='g';
+const diaDe=i=>{const d=new Date();d.setDate(d.getDate()-i);return d.toLocaleDateString('en-CA')};
+const fdia=k=>{const p=k.split('-');return p[2]+'/'+p[1]+'/'+p[0]};
+const fnota=n=>`<div class="it"><div class="t"><b>${esc(n.n)}</b><small>${fdia(n.d)} · ${n.h}</small></div></div>`;
+function notasUI(){
+ document.querySelectorAll('[data-nv]').forEach(b=>b.classList.toggle('on',b.dataset.nv===nvista));
+ const L=[...notas].sort((a,b)=>(b.d+b.h).localeCompare(a.d+a.h));
+ let h='';
+ if(nvista==='g'){h=L.length?L.map(fnota).join(''):'<p class="mu">Todavía no hay notas. Aparecerán al terminar un enfoque.</p>'}
+ else if(nvista==='s'){
+  for(let i=0;i<7;i++){const k=diaDe(i),ns=L.filter(n=>n.d===k);if(ns.length)h+=`<h3>${fdia(k)} <span class="mu">· ${ns.length} ${ns.length===1?'nota':'notas'}</span></h3>`+ns.map(fnota).join('')}
+  if(!h)h='<p class="mu">No hay notas en los últimos 7 días.</p>';
+ } else {
+  for(let w=0;w<5;w++){const ini=diaDe(w*7+6),fin=diaDe(w*7),ns=L.filter(n=>n.d>=ini&&n.d<=fin);if(ns.length)h+=`<h3>Del ${fdia(ini)} al ${fdia(fin)} <span class="mu">· ${ns.length} ${ns.length===1?'nota':'notas'}</span></h3>`+ns.map(fnota).join('')}
+  if(!h)h='<p class="mu">No hay notas en el último mes.</p>';
+ }
+ $('#nv').innerHTML=h;
+}
+$('#n').onclick=e=>{const v=e.target.dataset&&e.target.dataset.nv;if(v){nvista=v;notasUI()}};
+function mostrarNota(){$('#nota').hidden=false;$('#ntx').value='';note('¡Pomodoro terminado! Deja una nota en la pestaña Pomodoro.')}
+$('#nsv').onclick=()=>{const v=$('#ntx').value.trim();if(v){notas.push({d:day(),h:new Date().toTimeString().slice(0,5),n:v});kvset('notas',notas);notasUI()}$('#nota').hidden=true};
+$('#nno').onclick=()=>{$('#nota').hidden=true};
+function racha(){let n=0;const d=new Date();if(!((st.pomos[day()]||0)>0))d.setDate(d.getDate()-1);while((st.pomos[d.toLocaleDateString('en-CA')]||0)>0){n++;d.setDate(d.getDate()-1)}return n}
+let gm='escucha';
+const valorDia=k=>gm==='foco'?((st.foco||{})[k]||0):(st.days[k]||0);
+function grafica(){const n=gv,bars=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.toLocaleDateString('en-CA');bars.push({k,s:valorDia(k),l:n===7?'DLMXJVS'[d.getDay()]:d.getDate()})}
+ const max=Math.max(gm==='foco'?600:60,...bars.map(b=>b.s));const tot=bars.reduce((a,b)=>a+b.s,0);
+ const fmt=v=>gm==='foco'?Math.round(v/60)+' min':fh(v);
+ return `<div class="chartwrap"><div class="ch"><button data-g="7" class="${n===7?'on':''}">Semana</button><button data-g="30" class="${n===30?'on':''}">Mes</button><button data-m="escucha" class="${gm==='escucha'?'on':''}">Escucha</button><button data-m="foco" class="${gm==='foco'?'on':''}">Enfoque</button><span class="mu">Total: ${fmt(tot)}</span></div><div class="bars">${bars.map(b=>`<div class="bc" title="${b.k}: ${fmt(b.s)}"><div class="bb" style="height:${Math.max(2,Math.round(b.s/max*100))}%"></div><small>${b.l}</small></div>`).join('')}</div></div>`}
+$('#sx').onclick=e=>{const d=e.target.dataset||{};if(d.g){gv=+d.g;stats()}else if(d.m){gm=d.m;stats()}};
+function guardarUlt(){if(cur&&!restaurando&&A.currentTime>0)kvset('ult',{id:cur.id,t:Math.floor(A.currentTime)})}
+setInterval(guardarUlt,5000);addEventListener('pagehide',guardarUlt);
+async function restaurar(){if(!ult)return;const s=songs.find(x=>x.id===ult.id);if(!s)return;const b=await tx('blobs','readonly',o=>o.get(s.id));if(!b)return;
+ if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);cur=s;restaurando=true;
+ A.addEventListener('loadedmetadata',function una(){A.removeEventListener('loadedmetadata',una);A.currentTime=Math.min(ult.t,A.duration||ult.t);restaurando=false;head();render();loadLy()});
+ A.src=url}
+/* ===== HÁBITOS ===== */
+/* Edita aquí la hora del aviso (0 a 23). */
+const HAB_CFG={avisoHora:20};
+let habitos=[],hact={id:null,run:false,left:0,last:0},hdirty=false,hlast=0,hcalAbierto=new Set(),hbanOff=false,hAvisoHoy='';
+const hdur=()=>cfg.f*60;
+const htotal=h=>Object.values(h.dias).reduce((x,y)=>x+y,0);
+const hfmt=s=>{s=Math.floor(s||0);const hh=Math.floor(s/3600),m=Math.floor(s%3600/60);return hh?hh+' h '+m+' min':m+' min'};
+const hcl=s=>{s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const hreq=(h,k)=>{const dw=new Date(k+'T12:00:00').getDay();return !h.semana||!h.semana.length||h.semana.includes(dw)};
+const hok=(h,k)=>{const s=h.dias[k]||0;return h.meta>0?s>=h.meta*60:s>0};
+function hracha(h){let n=0;const d=new Date();for(let i=0;i<3650;i++){const k=d.toLocaleDateString('en-CA');if(hok(h,k))n++;else if(k!==day()&&hreq(h,k))break;d.setDate(d.getDate()-1)}return n}
+function hrachaTotal(){let n=0;const d=new Date();for(let i=0;i<3650;i++){const k=d.toLocaleDateString('en-CA');const req=habitos.filter(h=>hreq(h,k));const todos=req.length>0&&req.every(h=>hok(h,k));if(todos)n++;else if(k!==day()&&req.length>0)break;d.setDate(d.getDate()-1)}return n}
+function hadd(h,s){const k=day();h.dias[k]=(h.dias[k]||0)+s;hdirty=true}
+function hguardar(){if(hdirty){kvset('habitos',habitos);hdirty=false;hlast=Date.now()}}
+function hcommit(){if(!hact.run)return;const now=Date.now(),d=Math.min(60,(now-hact.last)/1000);hact.last=now;
+ const h=habitos.find(x=>x.id===hact.id);if(h)hadd(h,d);hact.left-=d;
+ if(hact.left<=0){hact.run=false;hact.left=hdur();beep();note('¡Pomodoro de '+(h?h.name:'hábito')+' terminado!')}}
+function hpausa(){hcommit();hact.run=false;hguardar()}
+function hplay(id){if(hact.id!==id){hpausa();hact={id,run:false,left:hdur(),last:0}}
+ if(hact.run)hpausa();else{hact.run=true;hact.last=Date.now()}hupdate()}
+function hlog(id,m){const h=habitos.find(x=>x.id===id);if(!h)return;hadd(h,m*60);hguardar();hupdate()}
+function hcalHTML(h){const hoy=new Date(),y=hoy.getFullYear(),m=hoy.getMonth(),dim=new Date(y,m+1,0).getDate(),off=new Date(y,m,1).getDay();
+ let c=['D','L','M','X','J','V','S'].map(l=>`<span class="cl">${l}</span>`).join('');
+ for(let i=0;i<off;i++)c+='<span></span>';
+ for(let d=1;d<=dim;d++){const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const fut=k>day(),ok=hok(h,k),falta=!fut&&!ok&&hreq(h,k)&&k!==day();
+  c+=`<span class="cd ${ok?'ok':falta?'miss':''} ${fut?'fut':''} ${k===day()?'hoy':''}" title="${k}: ${hfmt(h.dias[k]||0)}">${d}</span>`}
+ return `<div class="hcalTitle mu">${hoy.toLocaleDateString('es',{month:'long',year:'numeric'})}</div><div class="hcal">${c}</div>`}
+function hcardHTML(h){const cal=hcalAbierto.has(h.id);
+ return `<div class="hcard" data-hid="${h.id}">
+  <div class="hh"><b>${esc(h.name)}</b><span><button data-hedit class="x" title="Editar nombre">✎</button><button data-hdel class="x" title="Borrar hábito">✕</button></span></div>
+  <div class="hs"><span>🔥 <i class="hR"></i></span><span>Hoy <i class="hD"></i></span><span>Total <i class="hT"></i></span></div>
+  <div class="hbar"><div class="hfill"></div></div><div class="hmeta mu"></div>
+  <div class="hp"><button data-hplay class="pri hPB">▶ Pomodoro</button><span class="hC"></span></div>
+  <div class="hm"><input type="number" class="s hMin" min="1" placeholder="min"><button data-hlog>＋ Registrar tiempo</button></div>
+  <div class="hm"><label class="mu">Meta diaria (min) <input type="number" class="s hMeta" min="0" value="${h.meta||''}" placeholder="0"></label></div>
+  <div class="hdias">${['D','L','M','X','J','V','S'].map((l,i)=>`<button data-hdia="${i}">${l}</button>`).join('')}</div>
+  <button data-hcal class="hcalB">${cal?'▲ Ocultar calendario':'▼ Calendario del mes'}</button>
+  ${cal?'<div class="hcalw"></div>':''}
+ </div>`}
+function habitosUI(){$('#hl').innerHTML=habitos.map(hcardHTML).join('')||'<p class="mu">Aún no tienes hábitos. Escribe uno arriba y toca «＋ Hábito».</p>';hupdate()}
+function hupdate(){document.querySelectorAll('[data-hid]').forEach(c=>{const h=habitos.find(x=>x.id===c.dataset.hid);if(!h)return;
+ const act=hact.id===h.id,run=act&&hact.run,hoy=h.dias[day()]||0,pct=h.meta>0?Math.min(100,hoy/(h.meta*60)*100):(hoy>0?100:0);
+ c.querySelector('.hR').textContent=hracha(h)+(hracha(h)===1?' día':' días');
+ c.querySelector('.hD').textContent=hfmt(hoy);
+ c.querySelector('.hT').textContent=hfmt(htotal(h));
+ c.querySelector('.hC').textContent=act?(run?'⏸ ':'')+hcl(hact.left):'';
+ const b=c.querySelector('.hPB');b.textContent=run?'⏸ Pausar':(act?'▶ Seguir':'▶ Pomodoro');b.classList.toggle('on',run);
+ c.querySelector('.hfill').style.width=pct+'%';
+ c.querySelector('.hmeta').textContent=h.meta>0?(hok(h,day())?'✓ Meta de hoy cumplida':'Faltan '+hfmt(Math.max(0,h.meta*60-hoy))+' para la meta'):'Sin meta diaria';
+ c.querySelectorAll('[data-hdia]').forEach(x=>x.classList.toggle('on',!h.semana||!h.semana.length||h.semana.includes(+x.dataset.hdia)));
+ const cw=c.querySelector('.hcalw');if(cw)cw.innerHTML=hcalHTML(h)})}
+function hbanner(){const bn=$('#hbanner');if(!habitos.length||hbanOff){bn.hidden=true;return}
+ const hoy=day(),req=habitos.filter(h=>hreq(h,hoy)),pend=req.filter(h=>!hok(h,hoy)),r=hrachaTotal();
+ bn.hidden=false;
+ bn.innerHTML=`<span>🔥 Racha de hábitos: <b>${r} ${r===1?'día':'días'}</b> · ${req.length?'Hoy: <b>'+(req.length-pend.length)+'/'+req.length+'</b> cumplidos'+(pend.length?' · Pendientes: '+pend.map(h=>esc(h.name)).join(', '):' · ¡Todo cumplido! 🎉'):'Hoy no tienes hábitos programados'}</span><button id="hbX" class="x">✕</button>`}
+$('#hbanner').onclick=e=>{if(e.target.id==='hbX'){hbanOff=true;hbanner()}};
+function hAvisar(){if(!('Notification' in window)||Notification.permission!=='granted')return;const d=new Date(),k=day();if(d.getHours()<HAB_CFG.avisoHora||hAvisoHoy===k)return;hAvisoHoy=k;
+ const pend=habitos.filter(h=>hreq(h,k)&&!hok(h,k));if(!pend.length)return;
+ try{new Notification('Hábitos de hoy',{body:'Te faltan: '+pend.map(h=>h.name).join(', ')})}catch(e){}}
+$('#havisos').onclick=()=>{if(!('Notification' in window)){note('Este navegador no permite avisos.');return}
+ Notification.requestPermission().then(p=>{$('#havisos').textContent=p==='granted'?'🔔 Avisos activos':'🔕 Avisos desactivados'})};
+$('#havisos').textContent=('Notification' in window)&&Notification.permission==='granted'?'🔔 Avisos activos':'🔔 Activar avisos';
+$('#hnew').onclick=()=>{const n=$('#hname').value.trim();if(!n)return;habitos.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:n,dias:{},meta:0,semana:[]});kvset('habitos',habitos);$('#hname').value='';habitosUI();hbanner()};
+$('#hl').onclick=e=>{const c=e.target.closest('[data-hid]');if(!c)return;const id=c.dataset.hid,t=e.target,h=habitos.find(x=>x.id===id);if(!h)return;
+ if(t.matches('[data-hplay]'))hplay(id);
+ else if(t.matches('[data-hlog]')){const m=Math.floor(+c.querySelector('.hMin').value);if(m>0){hlog(id,m);c.querySelector('.hMin').value=''}}
+ else if(t.matches('[data-hdel]')){if(confirm('¿Borrar el hábito «'+h.name+'»?')){if(hact.id===id)hact={id:null,run:false,left:0,last:0};habitos=habitos.filter(x=>x.id!==id);kvset('habitos',habitos);habitosUI();hbanner()}}
+ else if(t.matches('[data-hedit]')){const n=prompt('Nuevo nombre',h.name);if(n&&n.trim()){h.name=n.trim();kvset('habitos',habitos);habitosUI()}}
+ else if(t.matches('[data-hdia]')){const i=+t.dataset.hdia;let s=h.semana&&h.semana.length?[...h.semana]:[0,1,2,3,4,5,6];
+  if(s.includes(i)){if(s.length===1)return;s=s.filter(x=>x!==i)}else s=[...s,i].sort();
+  h.semana=s.length===7?[]:s;kvset('habitos',habitos);hupdate();hbanner()}
+ else if(t.matches('[data-hcal]')){hcalAbierto.has(id)?hcalAbierto.delete(id):hcalAbierto.add(id);habitosUI()}};
+$('#hl').onchange=e=>{if(!e.target.matches('.hMeta'))return;const c=e.target.closest('[data-hid]');const h=habitos.find(x=>x.id===c.dataset.hid);if(!h)return;
+ h.meta=Math.max(0,Math.floor(+e.target.value||0));kvset('habitos',habitos);hupdate();hbanner()};
+setInterval(()=>{hcommit();if(hdirty&&(!hact.run||Date.now()-hlast>10000))hguardar();hupdate()},500);
+setInterval(hbanner,5000);
+setInterval(hAvisar,60000);
+addEventListener('pagehide',()=>{hcommit();hguardar()});
 </script></body></html>
