@@ -192,7 +192,7 @@ footer.min .ctl button:not(#pp){display:none}
 .fr{flex-wrap:wrap}
 .fr #vo{flex:1;min-width:80px}
 #vb{width:90px}
-#vr{min-width:0;padding:4px 8px;font-size:13px;border-radius:8px}
+#vr{width:90px}
 #lpop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,92vw);max-height:70vh;overflow:auto;background:var(--cd);border-radius:14px;padding:14px;z-index:9;box-shadow:0 10px 30px rgba(0,0,0,.6)}
 .lph{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .lpi{display:flex;gap:8px;align-items:center;padding:9px 4px;border-bottom:1px solid #333;cursor:pointer}
@@ -255,7 +255,7 @@ footer.min .ctl button:not(#pp){display:none}
   <input type="range" id="sk" min="0" max="1000" value="0">
   <div class="ab"><button id="sa">A</button><input class="s" id="ia" placeholder="0:00"><input class="s" id="ib" placeholder="0:00"><button id="sb">B</button><button id="lp">Loop</button></div>
  </div>
- <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"><span class="mu">🔊+</span><input type="range" id="vb" min="1" max="3" step="0.1" value="1"><span id="vbv" class="mu">100%</span><select id="vr" title="Velocidad"><option value="0.5">0.5x</option><option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></div>
+ <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"><span class="mu">🔊+</span><input type="range" id="vb" min="1" max="3" step="0.1" value="1"><span id="vbv" class="mu">100%</span><input type="range" id="vr" min="0.5" max="2" step="0.05" value="1" title="Velocidad"><span id="vrv" class="mu">1.00x</span></div>
 </footer>
 <div id="lpop" hidden></div>
 <div id="nota" class="notabox" hidden><p><b>¡Enfoque terminado!</b> ¿En qué trabajaste?</p><div class="bar"><input type="text" id="ntx" placeholder="Ej: repasé matemáticas" style="flex:1"><button class="pri" id="nsv">Guardar</button><button id="nno">Omitir</button></div></div>
@@ -592,7 +592,8 @@ $('#vr').value=String(vrate);
 function bsetup(){if(bctx)return;try{bctx=new (window.AudioContext||window.webkitAudioContext)();const fuente=bctx.createMediaElementSource(A);bgain=bctx.createGain();bgain.gain.value=+$('#vb').value;fuente.connect(bgain);bgain.connect(bctx.destination)}catch(e){bctx=null;bgain=null}}
 A.addEventListener('play',()=>{bsetup();if(bctx&&bctx.state==='suspended')bctx.resume()});
 $('#vb').oninput=e=>{const v=+e.target.value;if(bgain)bgain.gain.value=v;$('#vbv').textContent=Math.round(v*100)+'%'};
-$('#vr').onchange=e=>{vrate=+e.target.value;A.playbackRate=vrate;try{localStorage.setItem('vrate',String(vrate))}catch(err){}};
+$('#vr').oninput=e=>{vrate=+e.target.value;A.playbackRate=vrate;$('#vrv').textContent=vrate.toFixed(2)+'x';try{localStorage.setItem('vrate',String(vrate))}catch(err){}};
+$('#vrv').textContent=vrate.toFixed(2)+'x';
 A.addEventListener('loadedmetadata',()=>{A.playbackRate=vrate});
 /* ===== AGREGAR / QUITAR DE LISTAS ===== */
 let lpId=null;
