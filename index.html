@@ -193,6 +193,11 @@ footer.min .ctl button:not(#pp){display:none}
 .fr #vo{flex:1;min-width:80px}
 #vb{width:90px}
 #vr{min-width:0;padding:4px 8px;font-size:13px;border-radius:8px}
+#lpop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,92vw);max-height:70vh;overflow:auto;background:var(--cd);border-radius:14px;padding:14px;z-index:9;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.lph{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.lpi{display:flex;gap:8px;align-items:center;padding:9px 4px;border-bottom:1px solid #333;cursor:pointer}
+.lpi .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lpok{width:100%;margin-top:12px}
 </style></head><body>
 <div class="app">
 <aside>
@@ -252,6 +257,7 @@ footer.min .ctl button:not(#pp){display:none}
  </div>
  <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"><span class="mu">🔊+</span><input type="range" id="vb" min="1" max="3" step="0.1" value="1"><span id="vbv" class="mu">100%</span><select id="vr" title="Velocidad"><option value="0.5">0.5x</option><option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></div>
 </footer>
+<div id="lpop" hidden></div>
 <div id="nota" class="notabox" hidden><p><b>¡Enfoque terminado!</b> ¿En qué trabajaste?</p><div class="bar"><input type="text" id="ntx" placeholder="Ej: repasé matemáticas" style="flex:1"><button class="pri" id="nsv">Guardar</button><button id="nno">Omitir</button></div></div>
 
 <div id="pj" aria-hidden="true"><div class="gl" id="pjb" hidden></div><div id="pjf"><img id="pjim" alt="" src="saluda.png"></div></div>
@@ -282,7 +288,7 @@ function render(){
  $('#el').hidden=$('#dl').hidden=view==='all';$('#el').textContent=editing?'Listo':'Editar lista';
  const ids=view==='all'||editing?songs.map(s=>s.id):lists[view]||[];
  $('#list').innerHTML=ids.map(id=>{const s=songs.find(x=>x.id===id);if(!s)return'';const inL=view!=='all'&&(lists[view]||[]).includes(id);
-  return `<div class="it${cur&&cur.id===id?' now':''}" data-id="${id}"><div class="t" data-p><b>${esc(s.title)}</b><small>${esc(s.artist||'Sin artista')} · ${fh(s.secs)}</small></div>`+(editing?`<input type="checkbox" data-c ${inL?'checked':''}>`:view==='all'?'<button data-n title="Reproducir después">⤵</button><button data-e>✎</button><button data-d>✕</button>':'<button data-n title="Reproducir después">⤵</button><button data-r title="Quitar de esta lista">✕ quitar</button>')+'</div>'}).join('')||'<p class="mu">Aún no hay canciones. Toca «Agregar canciones».</p>'}
+  return `<div class="it${cur&&cur.id===id?' now':''}" data-id="${id}"><div class="t" data-p><b>${esc(s.title)}</b><small>${esc(s.artist||'Sin artista')} · ${fh(s.secs)}</small></div>`+(editing?`<input type="checkbox" data-c ${inL?'checked':''}>`:view==='all'?'<button data-lp title="Agregar o quitar de listas">📁</button><button data-n title="Reproducir después">⤵</button><button data-e>✎</button><button data-d>✕</button>':'<button data-lp title="Agregar o quitar de listas">📁</button><button data-n title="Reproducir después">⤵</button><button data-r title="Quitar de esta lista">✕ quitar</button>')+'</div>'}).join('')||'<p class="mu">Aún no hay canciones. Toca «Agregar canciones».</p>'}
 $('#add').onclick=()=>$('#file').click();
 $('#file').onchange=async e=>{for(const f of e.target.files){const n=f.name.replace(/\.[^.]+$/,''),p=n.includes(' - ')?n.split(/ - (.+)/):['',n];const s={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),artist:p[0].trim(),title:(p[1]||n).trim(),a:null,b:null,lrc:'',secs:0,plays:0,vid:/^video\//.test(f.type)||/\.(mp4|webm|m4v|mov|mkv)$/i.test(f.name)};mem.set(s.id,f);if(await put(s)==null||await tx('blobs','readwrite',o=>o.put(f,s.id))==null)note('No pude guardar «'+s.title+'»: sonará solo mientras no cierres la pestaña.');songs.push(s)}e.target.value='';render()};
 $('#sel').onchange=e=>{view=e.target.value;editing=false;render()};
@@ -294,6 +300,7 @@ $('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;const id=i
  else if(t.matches('[data-d]')){if(t.dataset.s!=='1'){t.dataset.s='1';t.textContent='¿Seguro?';setTimeout(()=>{t.dataset.s='';t.textContent='✕'},3000)}else{songs=songs.filter(x=>x!==s);Object.keys(lists).forEach(k=>lists[k]=lists[k].filter(i=>i!==id));tx('songs','readwrite',o=>o.delete(id));tx('blobs','readwrite',o=>o.delete(id));kvset('lists',lists);if(cur===s){A.pause();A.removeAttribute('src');cur=null;head()}render()}}
  else if(t.matches('[data-r]')){lists[view]=lists[view].filter(i=>i!==id);kvset('lists',lists);render()}
  else if(t.matches('[data-c]')){const l=lists[view];lists[view]=t.checked?[...l,id]:l.filter(i=>i!==id);kvset('lists',lists)}
+ else if(t.matches('[data-lp]'))abrirLP(id);
  else if(t.matches('[data-n]')){nextQ.push(id);note('Sonará después: «'+s.title+'» · En cola: '+nextQ.length)}
  else if(t.closest('[data-p]')&&!editing){queue=vids();play(id)}};
 /* reproducción */
@@ -587,4 +594,10 @@ A.addEventListener('play',()=>{bsetup();if(bctx&&bctx.state==='suspended')bctx.r
 $('#vb').oninput=e=>{const v=+e.target.value;if(bgain)bgain.gain.value=v;$('#vbv').textContent=Math.round(v*100)+'%'};
 $('#vr').onchange=e=>{vrate=+e.target.value;A.playbackRate=vrate;try{localStorage.setItem('vrate',String(vrate))}catch(err){}};
 A.addEventListener('loadedmetadata',()=>{A.playbackRate=vrate});
+/* ===== AGREGAR / QUITAR DE LISTAS ===== */
+let lpId=null;
+function abrirLP(id){if(!Object.keys(lists).length){note('Primero crea una lista con ＋ Lista.');return}lpId=id;lpDibuja();$('#lpop').hidden=false}
+function lpDibuja(){const s=songs.find(x=>x.id===lpId);$('#lpop').innerHTML=`<div class="lph"><b>Listas de «${esc(s?s.title:'')}»</b><button id="lpx" class="x">✕</button></div>`+Object.keys(lists).map(n=>`<label class="lpi"><input type="checkbox" data-lpn="${esc(n)}" ${lists[n].includes(lpId)?'checked':''}><span class="t">${esc(n)}</span><span class="mu">(${lists[n].length})</span></label>`).join('')+'<button class="pri" id="lpok">Listo</button>'}
+$('#lpop').onchange=e=>{const n=e.target.dataset.lpn;if(!n)return;const l=lists[n]||[];lists[n]=e.target.checked?[...new Set([...l,lpId])]:l.filter(i=>i!==lpId);kvset('lists',lists);lpDibuja();render()};
+$('#lpop').onclick=e=>{if(e.target.id==='lpx'||e.target.id==='lpok')$('#lpop').hidden=true};
 </script></body></html>
