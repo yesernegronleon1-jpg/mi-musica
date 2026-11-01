@@ -162,6 +162,14 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
 .vgrip{display:flex;justify-content:space-between;align-items:center;background:#1d1d1d;color:#bbb;font-size:12px;padding:6px 10px;user-select:none;touch-action:none}
 .vmov{cursor:move;flex:1}
 .vrz{cursor:nwse-resize;padding:0 4px;touch-action:none}
+#npan{padding:0 28px}
+#vwrap.fijo{position:relative!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;transform:none!important;width:100%!important;max-width:640px;margin-top:10px;box-shadow:none}
+#vwrap.fijo.big{width:100%!important;max-width:640px}
+#vwrap.fijo .vgrip{display:none}
+#vwrap.fijo #au{max-height:42vh}
+.vcap{display:none;padding:8px 12px;font-size:14px;font-weight:700;color:#fff;background:#1d1d1d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vwrap.fijo .vcap{display:block}
+@media(max-width:760px){#npan{padding:0 14px}}
 </style></head><body>
 <div class="app">
 <aside>
@@ -169,8 +177,9 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
  <nav id="tabs"><button data-t="m" class="on">🏠 Biblioteca</button><button data-t="l">🎤 Letra</button><button data-t="p">⏱ Pomodoro</button><button data-t="n">📝 Notas</button><button data-t="h">✅ Hábitos</button><button data-t="s">📊 Estadísticas</button></nav>
 </aside>
 <main>
- <div class="top"><p id="bn" class="w"></p><button id="vtog" class="ghost" hidden>🎬 ocultar video</button><button id="vgr" class="ghost" hidden>⤢ agrandar</button><button id="vfs" class="ghost" hidden>⛶ pantalla completa</button><button id="pjt" class="ghost">🐾 ocultar</button></div>
- <div id="hbanner" class="hbanner" hidden></div>
+ <div class="top"><p id="bn" class="w"></p><button id="vtog" class="ghost" hidden>🎬 ocultar video</button><button id="vpin" class="ghost" hidden>⧉ flotante</button><button id="vgr" class="ghost" hidden>⤢ agrandar</button><button id="vfs" class="ghost" hidden>⛶ pantalla completa</button><button id="pjt" class="ghost">🐾 ocultar</button></div>
+ <div id="npan"><div id="vwrap" class="fijo"><div class="vgrip"><span class="vmov">⠿ arrastra para mover</span><span class="vrz">⇲ tamaño</span></div><div class="vcap" id="vcap"></div><video id="au" playsinline controls></video></div></div>
+<div id="hbanner" class="hbanner" hidden></div>
  <section id="m" class="on">
   <div class="hero"><small class="mu">Tu biblioteca</small><h1>Mis canciones</h1></div>
   <div class="bar"><select id="sel"></select><button id="nl">＋ Lista</button><button class="pri" id="add">＋ Agregar canciones</button><input type="file" id="file" accept="audio/*,video/*,.mp3,.m4a,.wav,.ogg,.flac,.aac,.opus,.mp4,.webm,.m4v,.mov,.mkv" multiple hidden><button id="el" hidden>Editar lista</button><button id="dl" hidden>Borrar lista</button></div>
@@ -219,7 +228,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
  <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"></div>
 </footer>
 <div id="nota" class="notabox" hidden><p><b>¡Enfoque terminado!</b> ¿En qué trabajaste?</p><div class="bar"><input type="text" id="ntx" placeholder="Ej: repasé matemáticas" style="flex:1"><button class="pri" id="nsv">Guardar</button><button id="nno">Omitir</button></div></div>
-<div id="vwrap"><div class="vgrip"><span class="vmov">⠿ arrastra para mover</span><span class="vrz">⇲ tamaño</span></div><video id="au" playsinline controls></video></div>
+
 <div id="pj" aria-hidden="true"><div class="gl" id="pjb" hidden></div><div id="pjf"><img id="pjim" alt="" src="saluda.png"></div></div>
 <script>
 const $=s=>document.querySelector(s),A=$('#au');
@@ -515,7 +524,7 @@ addEventListener('pagehide',()=>{hcommit();hguardar()});
 /* ===== VIDEO ===== */
 const W=$('#vwrap');
 let vd=null;
-function vStart(e,modo){e.preventDefault();const r=W.getBoundingClientRect();W.style.left=r.left+'px';W.style.top=r.top+'px';W.style.right='auto';W.style.bottom='auto';W.style.transform='none';W.classList.remove('big');
+function vStart(e,modo){if(W.classList.contains('fijo'))return;e.preventDefault();const r=W.getBoundingClientRect();W.style.left=r.left+'px';W.style.top=r.top+'px';W.style.right='auto';W.style.bottom='auto';W.style.transform='none';W.classList.remove('big');
  vd={modo,x:e.clientX,y:e.clientY,l:r.left,t:r.top,w:r.width};W.setPointerCapture(e.pointerId)}
 W.querySelector('.vmov').onpointerdown=e=>vStart(e,'mover');
 W.querySelector('.vrz').onpointerdown=e=>vStart(e,'tamano');
@@ -523,8 +532,9 @@ W.onpointermove=e=>{if(!vd)return;const dx=e.clientX-vd.x,dy=e.clientY-vd.y;
  if(vd.modo==='mover'){W.style.left=Math.max(0,Math.min(innerWidth-60,vd.l+dx))+'px';W.style.top=Math.max(0,Math.min(innerHeight-40,vd.t+dy))+'px'}
  else{W.style.width=Math.max(180,Math.min(innerWidth-vd.l-4,vd.w+dx))+'px'}};
 W.onpointerup=W.onpointercancel=()=>{vd=null};
-function vidUI(s,b){const v=!!(s&&s.vid)||!!(b&&b.type&&b.type.startsWith('video/'));A.classList.toggle('vid',v);W.classList.toggle('vid',v);$('#vtog').hidden=!v;$('#vgr').hidden=!v;$('#vfs').hidden=!v;if(!v){W.classList.remove('off');W.classList.remove('big');W.removeAttribute('style');$('#vgr').textContent='⤢ agrandar'}}
+function vidUI(s,b){const v=!!(s&&s.vid)||!!(b&&b.type&&b.type.startsWith('video/'));A.classList.toggle('vid',v);W.classList.toggle('vid',v);$('#vtog').hidden=!v;$('#vgr').hidden=!v||W.classList.contains('fijo');$('#vfs').hidden=!v;$('#vpin').hidden=!v;$('#vcap').textContent=v&&s?(s.artist?s.artist+' — ':'')+s.title:'';if(!v){W.classList.remove('off');W.classList.remove('big');W.removeAttribute('style');$('#vgr').textContent='⤢ agrandar'}}
 $('#vgr').onclick=()=>{W.removeAttribute('style');W.classList.toggle('big');$('#vgr').textContent=W.classList.contains('big')?'⤡ reducir':'⤢ agrandar'};
+$('#vpin').onclick=()=>{const f=W.classList.toggle('fijo');$('#vpin').textContent=f?'⧉ flotante':'📌 fijar arriba';$('#vgr').hidden=f;W.removeAttribute('style');W.classList.remove('big')};
 $('#vfs').onclick=()=>{const f=A.requestFullscreen||A.webkitRequestFullscreen;try{f&&f.call(A)}catch(e){note('Este navegador no permite pantalla completa aquí.')}};
 $('#vtog').onclick=()=>{W.classList.toggle('off');$('#vtog').textContent=W.classList.contains('off')?'🎬 mostrar video':'🎬 ocultar video'};
 </script></body></html>
