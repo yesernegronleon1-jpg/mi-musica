@@ -153,10 +153,15 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
 .hcalTitle{font-size:13px;text-transform:capitalize;margin-bottom:6px}
 .hcard .hh span{display:flex;gap:2px}
 @media(max-width:760px){.hbanner{margin:8px 14px 0}}
-#au{display:none}
-#au.vid{display:block;position:fixed;right:16px;bottom:calc(var(--fh,96px) + 12px);width:300px;max-width:calc(100vw - 32px);z-index:5;border-radius:12px;background:#000;box-shadow:0 8px 24px rgba(0,0,0,.5)}
-#au.vid.off{display:none}
-#au.vid.big{left:50%;right:auto;transform:translateX(-50%);width:min(92vw,900px);max-height:70vh}
+#vwrap{display:none;position:fixed;right:16px;bottom:calc(var(--fh,96px) + 12px);width:300px;max-width:calc(100vw - 32px);z-index:5;border-radius:12px;background:#000;box-shadow:0 8px 24px rgba(0,0,0,.5);overflow:hidden}
+#vwrap.vid{display:block}
+#vwrap.off{display:none}
+#vwrap.big{left:50%;right:auto;transform:translateX(-50%);width:min(92vw,900px)}
+#au{display:none;width:100%;height:auto;max-height:70vh;object-fit:contain}
+#au.vid{display:block}
+.vgrip{display:flex;justify-content:space-between;align-items:center;background:#1d1d1d;color:#bbb;font-size:12px;padding:6px 10px;user-select:none;touch-action:none}
+.vmov{cursor:move;flex:1}
+.vrz{cursor:nwse-resize;padding:0 4px;touch-action:none}
 </style></head><body>
 <div class="app">
 <aside>
@@ -214,7 +219,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#181818;border-top:1px 
  <div class="fr"><span class="mu">🔈</span><input type="range" id="vo" min="0" max="1" step="0.01" value="1"></div>
 </footer>
 <div id="nota" class="notabox" hidden><p><b>¡Enfoque terminado!</b> ¿En qué trabajaste?</p><div class="bar"><input type="text" id="ntx" placeholder="Ej: repasé matemáticas" style="flex:1"><button class="pri" id="nsv">Guardar</button><button id="nno">Omitir</button></div></div>
-<video id="au" playsinline controls></video>
+<div id="vwrap"><div class="vgrip"><span class="vmov">⠿ arrastra para mover</span><span class="vrz">⇲ tamaño</span></div><video id="au" playsinline controls></video></div>
 <div id="pj" aria-hidden="true"><div class="gl" id="pjb" hidden></div><div id="pjf"><img id="pjim" alt="" src="saluda.png"></div></div>
 <script>
 const $=s=>document.querySelector(s),A=$('#au');
@@ -508,8 +513,18 @@ setInterval(hbanner,5000);
 setInterval(hAvisar,60000);
 addEventListener('pagehide',()=>{hcommit();hguardar()});
 /* ===== VIDEO ===== */
-function vidUI(s,b){const v=!!(s&&s.vid)||!!(b&&b.type&&b.type.startsWith('video/'));A.classList.toggle('vid',v);$('#vtog').hidden=!v;$('#vgr').hidden=!v;$('#vfs').hidden=!v;if(!v){A.classList.remove('off');A.classList.remove('big');$('#vgr').textContent='⤢ agrandar'}}
-$('#vgr').onclick=()=>{A.classList.toggle('big');$('#vgr').textContent=A.classList.contains('big')?'⤡ reducir':'⤢ agrandar'};
+const W=$('#vwrap');
+let vd=null;
+function vStart(e,modo){e.preventDefault();const r=W.getBoundingClientRect();W.style.left=r.left+'px';W.style.top=r.top+'px';W.style.right='auto';W.style.bottom='auto';W.style.transform='none';W.classList.remove('big');
+ vd={modo,x:e.clientX,y:e.clientY,l:r.left,t:r.top,w:r.width};W.setPointerCapture(e.pointerId)}
+W.querySelector('.vmov').onpointerdown=e=>vStart(e,'mover');
+W.querySelector('.vrz').onpointerdown=e=>vStart(e,'tamano');
+W.onpointermove=e=>{if(!vd)return;const dx=e.clientX-vd.x,dy=e.clientY-vd.y;
+ if(vd.modo==='mover'){W.style.left=Math.max(0,Math.min(innerWidth-60,vd.l+dx))+'px';W.style.top=Math.max(0,Math.min(innerHeight-40,vd.t+dy))+'px'}
+ else{W.style.width=Math.max(180,Math.min(innerWidth-vd.l-4,vd.w+dx))+'px'}};
+W.onpointerup=W.onpointercancel=()=>{vd=null};
+function vidUI(s,b){const v=!!(s&&s.vid)||!!(b&&b.type&&b.type.startsWith('video/'));A.classList.toggle('vid',v);W.classList.toggle('vid',v);$('#vtog').hidden=!v;$('#vgr').hidden=!v;$('#vfs').hidden=!v;if(!v){W.classList.remove('off');W.classList.remove('big');W.removeAttribute('style');$('#vgr').textContent='⤢ agrandar'}}
+$('#vgr').onclick=()=>{W.removeAttribute('style');W.classList.toggle('big');$('#vgr').textContent=W.classList.contains('big')?'⤡ reducir':'⤢ agrandar'};
 $('#vfs').onclick=()=>{const f=A.requestFullscreen||A.webkitRequestFullscreen;try{f&&f.call(A)}catch(e){note('Este navegador no permite pantalla completa aquí.')}};
-$('#vtog').onclick=()=>{A.classList.toggle('off');$('#vtog').textContent=A.classList.contains('off')?'🎬 mostrar video':'🎬 ocultar video'};
+$('#vtog').onclick=()=>{W.classList.toggle('off');$('#vtog').textContent=W.classList.contains('off')?'🎬 mostrar video':'🎬 ocultar video'};
 </script></body></html>
